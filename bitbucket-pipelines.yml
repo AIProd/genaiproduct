@@ -1,0 +1,31 @@
+pipelines:
+  branches:
+    main:
+      - step:
+          name: Build Python .so files
+          image: python:3.10
+          script:
+            - pip install -r requirements.txt
+            - python3.10 setup.py build_ext --inplace
+            - mkdir -p build
+            - cp *.so build/ || true
+          artifacts:
+            - build/**/*.so
+
+      - step:
+          name: Commit and push built files
+          image: alpine/git
+          script:
+            - git config --global user.email "pipeline@example.com"
+            - git config --global user.name "Bitbucket Pipeline"
+            - git add build/
+            - git commit -m "Add built .so files [skip ci]" || true
+            - git push origin HEAD:main
+
+      - step:
+          name: Deploy to production
+          deployment: production
+          script:
+            - echo "Deploying to production environment"
+            - # Add your deployment commands here
+            - echo "Deployment complete"
