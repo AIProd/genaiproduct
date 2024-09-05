@@ -6,8 +6,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any
 
 from generation.daily_report import template
-
-
+from generation.qlikurlgenerator import QlikSenseURLGenerator
 
 
 
@@ -42,7 +41,7 @@ class VisitReportGenerator:
         self.sales_df = sales_df
         self.sales_findings = sales_findings
 
-        self.sales_df = sales_df
+
 
         self.interaction_df = interaction_df
         self.consent_findings = consent_findings
@@ -108,7 +107,7 @@ class VisitReportGenerator:
                 "contact_web": "kinderpraxis-waedi.ch",
                 "findings": self._get_findings(employee_uuid, hcp_uuid, report_date),
                 # TODO: AIM-31 replace with correct value when becomes available
-                "qlik_sense_url": "https://ghh.qlikeurss.merck.com/sense/app/9183f2cc-33c6-4b01-85da-aea707c65733/sheet/72512643-9503-4b68-b202-796417d1c5b2/analysis/options/clearselections/select/hcp_id/CH-3130036/select/HCP%20Territory%20Business%20Unit/",
+                "qlik_sense_url": qlik_sense_url,
                 "report_data_month": report_month_name,
                 "sales": self._get_sales_metrics(employee_uuid, account_uuid, report_date),
                 "interactions": self._get_interaction_metrics(employee_uuid, account_uuid, report_date),
@@ -117,6 +116,8 @@ class VisitReportGenerator:
                 "insights": [],
                 "other_hcps": self._get_all_hcps_in_account(account_uuid, hcp_uuid),
                 "current_date": datetime.now().strftime("%d.%m.%Y"),
+                "account_360_url":account_360_url,
+                "customer_360_url":customer_360_url
             }
 
             html_string = template.render(template_data)
