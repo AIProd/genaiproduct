@@ -34,9 +34,9 @@ class MSDFinding(Finding):
 
     @staticmethod
     def _get_current_orders(hcp_data: pd.DataFrame) -> dict:
-        return hcp_data.groupby('product_name')['order_source'].last().to_dict()
+        return hcp_data.groupby('product_name')['source'].last().to_dict()
 
     @staticmethod
     def _get_msd_recommendations(hcp_data: pd.DataFrame, relevant_products: List[str]) -> List[str]:
         return [product for product in relevant_products if
-                hcp_data[(hcp_data['product_name'] == product) & (hcp_data['order_source'] == 'MSD')].empty]
+                hcp_data[(hcp_data['product_name'] == product) & (hcp_data['source'] == 'MSD')].empty]

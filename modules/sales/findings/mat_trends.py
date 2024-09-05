@@ -22,17 +22,16 @@ class MATTrends(Finding):
             pd.merge(mat_df, rolq_df, on=[
                 'timestamp',
                 'period',
-                'employee_name',
-                'hcp',
-                'account_name',
+                'employee_uuid',
+                'hcp_uuid',
+                'account_uuid',
                 'product_name',
                 'territory',
-                'specialty_code',
-                'sales_channel',
+                'channel',
                 'type',
                 'metrics',
-                'order_source',
-                'order_category',
+                'source',
+                'category',
             ], suffixes=('_mat', '_rolq'))
             .sort_values(by='timestamp', ascending=False).reset_index())
 

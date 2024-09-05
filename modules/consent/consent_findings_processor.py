@@ -11,17 +11,30 @@ class ConsentFindingsProcessor:
         self.findings_generators: List[Finding] = [
             LackOfExplicitConsentFinding()
         ]
-        self.output_data_frame = pd.DataFrame()
+        self.output_data_frame = pd.DataFrame(columns=['account_uuid',
+                                                       'hcp_uuid',
+                                                       'employee_uuid',
+                                                       'type',
+                                                       'details',
+                                                       'timestamp',
+                                                       ])
 
     def calculate_findings(self):
         findings = []
-        for _, group in self.input_data_frame.groupby(['account_name', 'hcp', 'employee_name']):
+        for _, group in self.input_data_frame.groupby(['account_uuid', 'hcp_uuid', 'employee_uuid']):
             for finding_generator in self.findings_generators:
                 result = finding_generator.generate(group)
                 if result:
                     findings.append(result)
 
-        self.output_data_frame = pd.DataFrame([finding.__dict__ for finding in findings])
+        self.output_data_frame = pd.DataFrame([finding.__dict__ for finding in findings], columns=[
+            'account_uuid',
+            'hcp_uuid',
+            'employee_uuid',
+            'type',
+            'details',
+            'timestamp',
+        ])
 
     def get_processed_data(self) -> pd.DataFrame:
         return self.output_data_frame

@@ -20,6 +20,12 @@ def get_ext_modules():
                 path = os.path.join(root, file)
                 module_name = os.path.splitext(path)[0].replace(os.path.sep, '.')
                 ext_modules.append(Extension(module_name, [path]))
+    for root, _, files in os.walk("generation"):
+        for file in files:
+            if file.endswith('.py'):
+                path = os.path.join(root, file)
+                module_name = os.path.splitext(path)[0].replace(os.path.sep, '.')
+                ext_modules.append(Extension(module_name, [path]))
     return ext_modules
 
 

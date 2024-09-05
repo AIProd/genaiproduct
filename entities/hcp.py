@@ -7,6 +7,7 @@ from dataclasses import dataclass, field, asdict
 
 @dataclass
 class HCP:
+    id: str
     name: str
     email: str
     specialty: str
@@ -17,6 +18,7 @@ class HCP:
     @classmethod
     def from_dict(cls, data: dict) -> 'HCP':
         hcp = cls(
+            id=data['id'],
             name=data['name'],
             email=data['email'],
             specialty=data['specialty'],

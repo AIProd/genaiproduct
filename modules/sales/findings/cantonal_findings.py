@@ -39,7 +39,7 @@ class CantonalFinding(Finding):
 
         if not gardasil_data.empty:
             latest_gardasil_record = gardasil_data.sort_values(by='timestamp').iloc[-1]
-            order_category = latest_gardasil_record['order_category']
+            order_category = latest_gardasil_record['category']
 
             if order_category != 'Cantonal':
                 findings.append(

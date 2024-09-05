@@ -1,3 +1,10 @@
+HCP_COLUMN = 'hcp'
+EMPLOYEE_NAME_COLUMN = 'employee_name'
+EMPLOYEE_EMAIL_COLUMN = 'emp_email'
+CALL_DATETIME_COLUMN = 'call_datetime'
+PLANNED_CALL_FLAG_COLUMN = 'planned_call_flag'
+PERIOD_DAILY = 'daily'
+TIME_FORMAT = '%Y-%m-%d'
 COMMON_GROUP_COLUMNS = [
     'employee_uuid',
     'account_uuid',

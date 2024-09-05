@@ -6,9 +6,9 @@ from modules.consent.utils import FindingResult
 
 class LackOfExplicitConsentFinding(Finding):
     def generate(self, data: pd.DataFrame) -> Optional[FindingResult]:
-        account_name = data['account_name'].iloc[0]
-        hcp = data['hcp'].iloc[0]
-        employee_name = data['employee_name'].iloc[0]
+        account_uuid = data['account_uuid'].iloc[0]
+        hcp_uuid = data['hcp_uuid'].iloc[0]
+        employee_uuid = data['employee_uuid'].iloc[0]
 
         findings_details = []
 
@@ -23,9 +23,9 @@ class LackOfExplicitConsentFinding(Finding):
         if findings_details:
             details = "; ".join(findings_details)
             return FindingResult(
-                account_name=account_name,
-                hcp=hcp,
-                employee_name=employee_name,
+                account_uuid=account_uuid,
+                hcp_uuid=hcp_uuid,
+                employee_uuid=employee_uuid,
                 type="Consent",
                 details=details
             )

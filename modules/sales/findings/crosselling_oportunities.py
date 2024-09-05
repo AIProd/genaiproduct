@@ -70,7 +70,8 @@ class CrossSellingFinding(Finding):
         return pd.merge(
             account_data[['account_uuid', 'hcp_uuid', 'specialty']].drop_duplicates(),
             self.cross_selling_map,
-            on='specialty',
+            left_on='specialty',
+            right_on='speciality',
             how='left'
         )
 

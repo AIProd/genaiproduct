@@ -30,7 +30,13 @@ class SalesFindingsProcessor:
         ]
 
         self.input_data_frame = input_data_frame
-        self.output_data_frame = pd.DataFrame()
+        self.output_data_frame = pd.DataFrame(columns=['account_uuid',
+                                                       'hcp_uuid',
+                                                       'employee_uuid',
+                                                       'type',
+                                                       'details',
+                                                       'timestamp',
+                                                       ])
 
     def calculate_findings(self):
         findings = []
