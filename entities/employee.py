@@ -15,7 +15,7 @@ class Employee:
     def from_dict(cls, data: dict) -> 'Employee':
         hcp = cls(
             name=data['name'],
-            email=data['email'],
+            email=data['email']
         )
         if 'uuid' in data:
             hcp.uuid = data['uuid']

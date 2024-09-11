@@ -1,5 +1,6 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 from modules.sales import constants
 from modules.sales.utils import _create_time_series
 

@@ -1,9 +1,11 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
+
 import pandas as pd
 
 from modules.sales.constants import COMMON_GROUP_COLUMNS
+
 
 def filter_data_by_date(sales_data_frame: pd.DataFrame, month: int, year: int) -> pd.DataFrame:
     return sales_data_frame[

@@ -29,6 +29,8 @@ class PlannedVisitsProcessor:
             pd.to_datetime(self.processing_data_frame['timestamp']).dt.date.isin(business_days.date)
         ]
 
+        self.output_data_frame = self.output_data_frame.drop_duplicates(subset=['hcp_uuid', 'employee_uuid', 'account_uuid', 'timestamp'])
+
     def _calculate_planned_visits(self) -> None:
         self.output_data_frame['period'] = PERIOD_DAILY
         self._reorder_columns()

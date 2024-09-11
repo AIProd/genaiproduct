@@ -1,5 +1,7 @@
 from typing import Optional
+
 import pandas as pd
+
 from modules.consent.findings.finding import Finding
 from modules.consent.utils import FindingResult
 

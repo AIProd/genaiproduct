@@ -282,6 +282,22 @@ template = jinja2.Template(
                                 </div>
                                 <div>
                                     <a
+                                            href="{{account_360_url}}"
+                                            class="round-box round-box--success"
+                                    >
+                                        Account360
+                                    </a>
+                                </div>
+                                <div>
+                                    <a
+                                            href="{{hcp_360_url}}"
+                                            class="round-box round-box--success"
+                                    >
+                                        HCP360
+                                    </a>
+                                </div>
+                                <div>
+                                    <a
                                             href="{{google_map_url}}"
                                             class="round-box round-box--warning"
                                     >
@@ -381,7 +397,7 @@ template = jinja2.Template(
 
                         <div style="display: flex; gap: 24px;">
                             <div
-                                    style="flex: 0 0 auto; width: 65%; display: flex; flex-direction: column; gap: 24px;"
+                                    style="flex: 0 0 auto; width: 100%; display: flex; flex-direction: column; gap: 24px;"
                             >
                                 <div class="card no-split">
                                     <div style="padding: 18px 20px;">
@@ -624,110 +640,61 @@ template = jinja2.Template(
                                         </tbody>
                                     </table>
                                 </div>
+                                
+                                
+                                <div class="card no-split">
+    <div style="padding: 18px 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none"
+                     xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                          d="M2.5 5C2.5 3.61929 3.61929 2.5 5 2.5H15C16.3807 2.5 17.5 3.61929 17.5 5V15C17.5 16.3807 16.3807 17.5 15 17.5H5C3.61929 17.5 2.5 16.3807 2.5 15V5ZM15 4.16667H13.125V6.875H15.8333V5C15.8333 4.53976 15.4602 4.16667 15 4.16667ZM11.4583 4.16667V6.875H8.54167V4.16667H11.4583ZM11.4583 8.54167H8.54167V11.4583H11.4583V8.54167ZM11.4583 13.125H8.54167V15.8333H11.4583V13.125ZM6.875 11.4583V8.54167H4.16667V11.4583H6.875ZM4.16667 13.125H6.875V15.8333H5C4.53976 15.8333 4.16667 15.4602 4.16667 15V13.125ZM15.8333 13.125V15C15.8333 15.4602 15.4602 15.8333 15 15.8333H13.125V13.125H15.8333ZM15.8333 11.4583H13.125V8.54167H15.8333V11.4583ZM6.875 4.16667V6.875H4.16667V5C4.16667 4.53976 4.53976 4.16667 5 4.16667H6.875Z"
+                          fill="#667085"/>
+                </svg>
+                <div style="font-size: 18px;">
+                    Previous Visits
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="round-box round-box--success">
+                    {{report_data_month}}
+                </div>
+                <a href="{{qlik_sense_url}}">
+                    <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M15.9497 9.46447V15.5356C15.9497 16.0878 16.3975 16.5356 16.9497 16.5356C17.502 16.5356 17.9497 16.0878 17.9497 15.5356L17.9497 6.55027C17.9497 6.27413 17.7259 6.05027 17.4497 6.05027L16.9545 6.05027C16.9513 6.05026 16.9481 6.05026 16.9449 6.05027L8.46445 6.05027C7.91217 6.05027 7.46445 6.49799 7.46445 7.05027C7.46446 7.60256 7.91217 8.05027 8.46445 8.05027H14.5355L6.34313 16.2427C5.9526 16.6332 5.9526 17.2663 6.34313 17.6569C6.73365 18.0474 7.36681 18.0474 7.75734 17.6569L15.9497 9.46447Z"
+                            fill="#667085"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Employee</th>
+            <th>Date</th>
+            <th>Email</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for visit in previous_visits %}
+        <tr>
+            <td>{{visit.employee_name}}</td>
+            <td class="color-secondary">{{visit.date.strftime('%Y-%m-%d')}}</td>
+            <td class="color-secondary">{{visit.employee_email}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+                                
                             </div>
-                            <div
-                                    style="flex: 1 1 auto; display: flex; flex-direction: column; gap: 24px;"
-                            >
-                                <div class="card">
-                                    <div class="card-inner">
-                                        <div class="card-header">
-                                            <div
-                                                    class="icon-circle"
-                                                    style="background-color: #FAE1CF; border: 4px solid #FDF1E8;"
-                                            >
-                                                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z" fill="#E46A11"/>
-                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M2 7C2 5.34315 3.34315 4 5 4H19C20.6569 4 22 5.34315 22 7V17C22 18.6569 20.6569 20 19 20H5C3.34315 20 2 18.6569 2 17V7ZM18.1707 6H19C19.5523 6 20 6.44771 20 7V7.82929C19.1476 7.52801 18.472 6.85241 18.1707 6ZM16.1 6H7.89998C7.5023 7.95913 5.95913 9.5023 4 9.89998V14.1C5.95913 14.4977 7.5023 16.0409 7.89998 18H16.1C16.4977 16.0409 18.0409 14.4977 20 14.1V9.89998C18.0409 9.5023 16.4977 7.95913 16.1 6ZM20 16.1707C19.1476 16.472 18.472 17.1476 18.1707 18H19C19.5523 18 20 17.5523 20 17V16.1707ZM5.82929 18C5.52801 17.1476 4.85241 16.472 4 16.1707V17C4 17.5523 4.44772 18 5 18H5.82929ZM4 7.82929C4.85241 7.52801 5.52801 6.85241 5.82929 6H5C4.44772 6 4 6.44772 4 7V7.82929Z" fill="#E46A11"/>
-                                                </svg>
-                                            </div>
-
-                                            <a href="https://ghh.qlikeurss.merck.com/sense/app/9183f2cc-33c6-4b01-85da-aea707c65733/sheet/72512643-9503-4b68-b202-796417d1c5b2/analysis/options/clearselections/select/hcp_id/CH-3130036/select/HCP%20Territory%20Business%20Unit/">
-                                                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M15.9497 9.46447V15.5356C15.9497 16.0878 16.3975 16.5356 16.9497 16.5356C17.502 16.5356 17.9497 16.0878 17.9497 15.5356L17.9497 6.55027C17.9497 6.27413 17.7259 6.05027 17.4497 6.05027L16.9545 6.05027C16.9513 6.05026 16.9481 6.05026 16.9449 6.05027L8.46445 6.05027C7.91217 6.05027 7.46445 6.49799 7.46445 7.05027C7.46446 7.60256 7.91217 8.05027 8.46445 8.05027H14.5355L6.34313 16.2427C5.9526 16.6332 5.9526 17.2663 6.34313 17.6569C6.73365 18.0474 7.36681 18.0474 7.75734 17.6569L15.9497 9.46447Z" fill="#667085"/>
-                                                </svg>
-
-                                            </a>
-                                        </div>
-                                        <div class="card-title">
-                                            Territory sales
-                                        </div>
-                                        <div class="card-footer">
-                                            <div class="card-price">
-                                                N/A
-                                            </div>
-                                            <div class="badge badge--neutral">
-                                                N/A
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card">
-                                    <div class="card-inner">
-                                        <div class="card-header">
-                                            <div
-                                                    class="icon-circle"
-                                                    style="background-color: #FCDAD7; border: 4px solid #FEEDEC;"
-                                            >
-                                                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z" fill="#F04438"/>
-                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M2 7C2 5.34315 3.34315 4 5 4H19C20.6569 4 22 5.34315 22 7V17C22 18.6569 20.6569 20 19 20H5C3.34315 20 2 18.6569 2 17V7ZM18.1707 6H19C19.5523 6 20 6.44771 20 7V7.82929C19.1476 7.52801 18.472 6.85241 18.1707 6ZM16.1 6H7.89998C7.5023 7.95913 5.95913 9.5023 4 9.89998V14.1C5.95913 14.4977 7.5023 16.0409 7.89998 18H16.1C16.4977 16.0409 18.0409 14.4977 20 14.1V9.89998C18.0409 9.5023 16.4977 7.95913 16.1 6ZM20 16.1707C19.1476 16.472 18.472 17.1476 18.1707 18H19C19.5523 18 20 17.5523 20 17V16.1707ZM5.82929 18C5.52801 17.1476 4.85241 16.472 4 16.1707V17C4 17.5523 4.44772 18 5 18H5.82929ZM4 7.82929C4.85241 7.52801 5.52801 6.85241 5.82929 6H5C4.44772 6 4 6.44772 4 7V7.82929Z" fill="#F04438"/>
-                                                </svg>
-
-                                            </div>
-                                            <a href="https://ghh.qlikeurss.merck.com/sense/app/9183f2cc-33c6-4b01-85da-aea707c65733/sheet/72512643-9503-4b68-b202-796417d1c5b2/analysis/options/clearselections/select/hcp_id/CH-3130036/select/HCP%20Territory%20Business%20Unit/">
-                                                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M15.9497 9.46447V15.5356C15.9497 16.0878 16.3975 16.5356 16.9497 16.5356C17.502 16.5356 17.9497 16.0878 17.9497 15.5356L17.9497 6.55027C17.9497 6.27413 17.7259 6.05027 17.4497 6.05027L16.9545 6.05027C16.9513 6.05026 16.9481 6.05026 16.9449 6.05027L8.46445 6.05027C7.91217 6.05027 7.46445 6.49799 7.46445 7.05027C7.46446 7.60256 7.91217 8.05027 8.46445 8.05027H14.5355L6.34313 16.2427C5.9526 16.6332 5.9526 17.2663 6.34313 17.6569C6.73365 18.0474 7.36681 18.0474 7.75734 17.6569L15.9497 9.46447Z" fill="#667085"/>
-                                                </svg>
-
-                                            </a>
-                                        </div>
-                                        <div class="card-title">
-                                            Territory moving annual total
-                                        </div>
-                                        <div class="card-footer">
-                                            <div class="card-price">
-                                                N/A
-                                            </div>
-                                            <div class="badge badge--neutral">
-                                                N/A
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="card">
-                                    <div class="card-inner">
-                                        <div class="card-header">
-                                            <div
-                                                    class="icon-circle"
-                                                    style="background-color: #CFE7DC; border: 4px solid #E7F4EE;"
-                                            >
-                                                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM12 14C13.1046 14 14 13.1046 14 12C14 10.8954 13.1046 10 12 10C10.8954 10 10 10.8954 10 12C10 13.1046 10.8954 14 12 14Z" fill="#0D894F"/>
-                                                <path fill-rule="evenodd" clip-rule="evenodd" d="M2 7C2 5.34315 3.34315 4 5 4H19C20.6569 4 22 5.34315 22 7V17C22 18.6569 20.6569 20 19 20H5C3.34315 20 2 18.6569 2 17V7ZM18.1707 6H19C19.5523 6 20 6.44771 20 7V7.82929C19.1476 7.52801 18.472 6.85241 18.1707 6ZM16.1 6H7.89998C7.5023 7.95913 5.95913 9.5023 4 9.89998V14.1C5.95913 14.4977 7.5023 16.0409 7.89998 18H16.1C16.4977 16.0409 18.0409 14.4977 20 14.1V9.89998C18.0409 9.5023 16.4977 7.95913 16.1 6ZM20 16.1707C19.1476 16.472 18.472 17.1476 18.1707 18H19C19.5523 18 20 17.5523 20 17V16.1707ZM5.82929 18C5.52801 17.1476 4.85241 16.472 4 16.1707V17C4 17.5523 4.44772 18 5 18H5.82929ZM4 7.82929C4.85241 7.52801 5.52801 6.85241 5.82929 6H5C4.44772 6 4 6.44772 4 7V7.82929Z" fill="#0D894F"/>
-                                                </svg>
-
-                                            </div>
-                                            <a href="https://ghh.qlikeurss.merck.com/sense/app/9183f2cc-33c6-4b01-85da-aea707c65733/sheet/72512643-9503-4b68-b202-796417d1c5b2/analysis/options/clearselections/select/hcp_id/CH-3130036/select/HCP%20Territory%20Business%20Unit/">
-                                                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M15.9497 9.46447V15.5356C15.9497 16.0878 16.3975 16.5356 16.9497 16.5356C17.502 16.5356 17.9497 16.0878 17.9497 15.5356L17.9497 6.55027C17.9497 6.27413 17.7259 6.05027 17.4497 6.05027L16.9545 6.05027C16.9513 6.05026 16.9481 6.05026 16.9449 6.05027L8.46445 6.05027C7.91217 6.05027 7.46445 6.49799 7.46445 7.05027C7.46446 7.60256 7.91217 8.05027 8.46445 8.05027H14.5355L6.34313 16.2427C5.9526 16.6332 5.9526 17.2663 6.34313 17.6569C6.73365 18.0474 7.36681 18.0474 7.75734 17.6569L15.9497 9.46447Z" fill="#667085"/>
-                                                </svg>
-
-                                            </a>
-                                        </div>
-                                        <div class="card-title">
-                                            Territory rolling quarter
-                                        </div>
-                                        <div class="card-footer">
-                                            <div class="card-price">
-                                                N/A
-                                            </div>
-                                            <div class="badge badge--neutral">
-                                                N/A
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            
+                        
                         </div>
 
                         <div style="margin-top: 10px;"></div>
@@ -752,6 +719,6 @@ template = jinja2.Template(
     </footer>
 </div>
 </body>
-</html>
+</html>;
     """
 )

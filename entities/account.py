@@ -10,6 +10,9 @@ class Account:
     id: int
     name: str
     category: str
+    street: str
+    city: str
+    zip: str
     uuid: str = field(default_factory=lambda: str(uuid4()))
 
     @classmethod
@@ -18,7 +21,9 @@ class Account:
             id=data['id'],
             name=data['name'],
             category=data['category'],
-
+            street=data['street'],
+            city=data['city'],
+            zip=data['zip']
         )
         if 'uuid' in data:
             account.uuid = data['uuid']

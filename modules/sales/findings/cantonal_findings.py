@@ -1,10 +1,17 @@
-from datetime import datetime
 from typing import Optional, List
 import pandas as pd
 
 from modules.sales import constants
 from modules.sales.findings.finding import Finding
 from modules.sales.utils import FindingResult
+from typing import Optional, List
+
+import pandas as pd
+
+from modules.sales import constants
+from modules.sales.findings.finding import Finding
+from modules.sales.utils import FindingResult
+
 
 class CantonalFinding(Finding):
     def __init__(self, hcps_df: pd.DataFrame):

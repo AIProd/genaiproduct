@@ -1,11 +1,11 @@
 import pandas as pd
 
+from modules.sales.findings.cantonal_findings import CantonalFinding
 from modules.sales.findings.crosselling_oportunities import CrossSellingFinding
+from modules.sales.findings.highperforming_account import HighperformingAccounts
 from modules.sales.findings.mat_trends import MATTrends
 from modules.sales.findings.msd_orders import MSDFinding
-from modules.sales.findings.cantonal_findings import CantonalFinding
 from modules.sales.findings.underperforming_accounts import UnderperformingAccounts
-from modules.sales.findings.highperforming_account import HighperformingAccounts
 
 
 class SalesFindingsProcessor:

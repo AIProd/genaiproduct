@@ -1,4 +1,5 @@
 from typing import List
+
 import pandas as pd
 
 from modules.consent.findings.finding import Finding

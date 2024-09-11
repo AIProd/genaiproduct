@@ -1,9 +1,16 @@
-from datetime import datetime
 from typing import Optional, List
 import pandas as pd
 from modules.sales.findings.finding import Finding
 from modules.sales.utils import FindingResult
 from modules.sales import constants
+from typing import Optional, List
+
+import pandas as pd
+
+from modules.sales import constants
+from modules.sales.findings.finding import Finding
+from modules.sales.utils import FindingResult
+
 
 class HighperformingAccounts(Finding):
     def generate(self, data: pd.DataFrame) -> Optional[List[FindingResult]]:

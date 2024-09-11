@@ -9,7 +9,6 @@ from generation.daily_report import template
 from generation.qlikurlgenerator import QlikSenseURLGenerator
 
 
-
 class VisitReportGenerator:
     IMPORTANT_SALES_METRICS = [
         'MATGrowthPY', 'ROLQGrowthPY', 'moving_annual_total',
@@ -41,14 +40,13 @@ class VisitReportGenerator:
         self.sales_df = sales_df
         self.sales_findings = sales_findings
 
-
-
         self.interaction_df = interaction_df
         self.consent_findings = consent_findings
 
         self.hcps = hcps_df
         self.accounts = accounts_df
         self.employees = employees_df
+        self.qlik_url_generator = QlikSenseURLGenerator()
 
     @staticmethod
     def _find_row_as_dict(df, uuid_value):
@@ -73,6 +71,31 @@ class VisitReportGenerator:
 
         return first_day_two_months_ago, month_name
 
+    def _get_previous_visits(self, hcp_uuid: str, account_uuid: str, exclude_employee_uuid: str) -> List[Dict[str, Any]]:
+        previous_visits = self.interaction_df[
+            (self.interaction_df['hcp_uuid'] == hcp_uuid)
+            & (self.interaction_df['account_uuid'] == account_uuid)
+            & (self.interaction_df['employee_uuid'] != exclude_employee_uuid)
+        ]
+
+        if previous_visits.empty:
+            return []
+
+        previous_visits_sorted = previous_visits.sort_values(by='timestamp', ascending=False)
+
+        latest_visits = previous_visits_sorted.drop_duplicates(subset='employee_uuid', keep='first')
+
+        visits = []
+        for _, visit in latest_visits.iterrows():
+            employee = self._find_row_as_dict(self.employees, visit['employee_uuid'])
+            visits.append({
+                "date": visit['timestamp'],
+                "employee_name": employee['name'],
+                "employee_email": employee['email'],
+            })
+
+        return visits
+
     def generate_report_for_employee(self, employee_uuid: str) -> list[Any]:
         employee_visits = self.planned_visits_df[self.planned_visits_df['employee_uuid'] == employee_uuid]
         html_reports = []
@@ -92,6 +115,13 @@ class VisitReportGenerator:
             except ValueError as e:
                 print(e)
                 continue
+            previous_visits = self._get_previous_visits(hcp_uuid, account_uuid, employee_uuid)
+
+            account_id=account_data['id']
+            hcp_id=hcp_data['id']
+            qlik_customer360_url = self.qlik_url_generator.generate_customer_360_insights_url()
+            account_360_url = self.qlik_url_generator.generate_account_page_url(account_id)
+            hcp_360_url = self.qlik_url_generator.generate_hcp_page_url(hcp_id)
 
             template_data = {
                 "hcp_name": hcp_data['name'],
@@ -107,7 +137,6 @@ class VisitReportGenerator:
                 "contact_web": "kinderpraxis-waedi.ch",
                 "findings": self._get_findings(employee_uuid, hcp_uuid, report_date),
                 # TODO: AIM-31 replace with correct value when becomes available
-                "qlik_sense_url": qlik_sense_url,
                 "report_data_month": report_month_name,
                 "sales": self._get_sales_metrics(employee_uuid, account_uuid, report_date),
                 "interactions": self._get_interaction_metrics(employee_uuid, account_uuid, report_date),
@@ -116,8 +145,10 @@ class VisitReportGenerator:
                 "insights": [],
                 "other_hcps": self._get_all_hcps_in_account(account_uuid, hcp_uuid),
                 "current_date": datetime.now().strftime("%d.%m.%Y"),
+                "qlik_customer360_url":qlik_customer360_url,
                 "account_360_url":account_360_url,
-                "customer_360_url":customer_360_url
+                "hcp_360_url": hcp_360_url,
+                "previous_visits":previous_visits
             }
 
             html_string = template.render(template_data)
@@ -141,10 +172,12 @@ class VisitReportGenerator:
         for product in unique_products:
             product_df = sales_data[sales_data['product_name'] == product]
 
-            mat = product_df[product_df['indicator'] == 'MAT']['value'].sum()
-            mat_change = product_df[product_df['indicator'] == 'mat_growth_change_previous_year']['value'].sum()
-            rolq = product_df[product_df['indicator'] == 'ROLQ']['value'].sum()
-            rolq_change = product_df[product_df['indicator'] == 'rolling_quarter_change_previous_year']['value'].sum()
+            mat = round(product_df[product_df['indicator'] == 'MAT']['value'].sum(), 2).astype(float)
+            mat_change = round(product_df[product_df['indicator'] == 'mat_growth_change_previous_year']['value'].sum(),
+                               2).astype(float)
+            rolq = round(product_df[product_df['indicator'] == 'ROLQ']['value'].sum(), 2).astype(float)
+            rolq_change = round(product_df[product_df['indicator'] == 'rolling_quarter_change_previous_year']['value'].sum(),
+                2) .astype(float)
 
             sales.append(
                 {
@@ -170,12 +203,10 @@ class VisitReportGenerator:
 
         trends = []
         for _, row in sales_finding_data.iterrows():
-            trends.append(
-                {
-                    "type": row['type'],
-                    "text": row['details']
-                }
-            )
+            trends.append({
+                "type": row['type'],
+                "text": f"{float(row['details']):.2f}" if isinstance(row['details'], (int, float)) else row['details']
+            })
 
         return trends
 
@@ -195,7 +226,7 @@ class VisitReportGenerator:
             findings.append(
                 {
                     "type": row["type"],
-                    "text": row['details']
+                    "text": f"{float(row['details']):.2f}" if isinstance(row['details'], (int, float)) else row['details']
                 }
             )
 
@@ -203,7 +234,8 @@ class VisitReportGenerator:
 
     def _get_interaction_metrics(self, employee_uuid: str, account_uuid: str, report_date) -> List[Dict[str, Any]]:
         report_date_ts = pd.Timestamp(report_date)
-        self.interaction_df['timestamp'] = pd.to_datetime(self.interaction_df['timestamp']).dt.tz_localize(None)
+
+        self.interaction_df['timestamp'] = pd.to_datetime(self.interaction_df['timestamp'],errors="coerce").dt.tz_localize(None)
         interactions_data = self.interaction_df[
             (self.interaction_df['employee_uuid'] == employee_uuid)
             & (self.interaction_df['account_uuid'] == account_uuid)
@@ -217,10 +249,12 @@ class VisitReportGenerator:
         for channel in unique_channels:
             channel_df = interactions_data[interactions_data['channel'] == channel]
 
-            mat = channel_df[channel_df['indicator'] == 'MAT']['value'].sum()
-            mat_change = channel_df[channel_df['indicator'] == 'MATGrowthPY']['value'].sum()
-            rolq = channel_df[channel_df['indicator'] == 'ROLQ']['value'].sum()
-            rolq_change = channel_df[channel_df['indicator'] == 'ROLQGrowthPY']['value'].sum()
+            mat_change = round(channel_df[channel_df['indicator'] == 'MATGrowthPY']['value'].astype(float).sum())
+
+            mat = round(channel_df[channel_df['indicator'] == 'MAT']['value'].astype(float).sum())
+            rolq = round(channel_df[channel_df['indicator'] == 'ROLQ']['value'].astype(float).sum())
+            rolq_change = round(channel_df[channel_df['indicator'] == 'ROLQGrowthPY']['value'].astype(float).sum())
+
 
             interactions.append(
                 {

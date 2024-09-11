@@ -119,6 +119,7 @@ class EntityManager:
             raise ValueError(f"No mapping registered for {entity_class.__name__}")
 
         missing_columns = set(mapping.values()) - set(df.columns)
+
         if missing_columns:
             raise ValueError(f"Columns {missing_columns} not found in DataFrame")
 
