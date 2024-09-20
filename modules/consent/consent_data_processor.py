@@ -43,7 +43,7 @@ class ConsentDataProcessor:
         # Sorting to ensure the latest date is taken
         self.processing_data_frame = self.processing_data_frame.sort_values(by='cases_date')
 
-    def calculate_consent_metrics(self):
+    def process_data(self):
         """
         Calculate consent metrics.
         """
@@ -63,7 +63,7 @@ class ConsentDataProcessor:
         consent_df['indicator'] = constants.INDICATOR_CONSENT
 
         # Formatting the timestamp
-        consent_df['timestamp'] = consent_df['cases_date'].dt.strftime('%Y-%m-%d')
+        consent_df['timestamp'] = consent_df['cases_date'].transform(lambda x: x.isoformat())
         consent_df['period'] = constants.PERIOD_DATE
 
         consent_flag_df = self._add_consent_flag_data()
@@ -85,7 +85,7 @@ class ConsentDataProcessor:
             consent_flag_df['type'] = 'consent'
             consent_flag_df['metrics'] = metric
             consent_flag_df['period'] = constants.PERIOD_DATE
-            consent_flag_df['timestamp'] = pd.NA
+            consent_flag_df['timestamp'] = pd.NaT
 
             # Ensure only the required columns are present and others are set to empty
             required_columns = [

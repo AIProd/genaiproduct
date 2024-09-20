@@ -1,15 +1,10 @@
 from typing import Optional, List
-import pandas as pd
-from modules.sales.findings.finding import Finding
-from modules.sales.utils import FindingResult
-from modules.sales import constants
-from typing import Optional, List
 
 import pandas as pd
 
+from modules.global_utils import FindingResult
 from modules.sales import constants
 from modules.sales.findings.finding import Finding
-from modules.sales.utils import FindingResult
 
 
 class HighperformingAccounts(Finding):
@@ -33,11 +28,11 @@ class HighperformingAccounts(Finding):
         recent_mat_growth = mat_growth_df[mat_growth_df['timestamp'] == most_recent_month]
         recent_rolq_growth = rolq_growth_df[rolq_growth_df['timestamp'] == most_recent_month]
 
-
         for _, row in recent_mat_growth.iterrows():
             product_name = row['product_name']
             mat_growth_value = float(row['value'])
-            rolq_growth_value = float(recent_rolq_growth[recent_rolq_growth['product_name'] == product_name]['value'].iloc[0])
+            rolq_growth_value = float(
+                recent_rolq_growth[recent_rolq_growth['product_name'] == product_name]['value'].iloc[0])
             if mat_growth_value > 0 and rolq_growth_value > 0:
                 findings.append(FindingResult(
                     account_uuid=account_uuid,

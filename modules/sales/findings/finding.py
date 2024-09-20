@@ -3,7 +3,7 @@ from typing import Optional, List
 
 import pandas as pd
 
-from modules.sales.utils import FindingResult
+from modules.global_utils import FindingResult
 
 
 class Finding(ABC):

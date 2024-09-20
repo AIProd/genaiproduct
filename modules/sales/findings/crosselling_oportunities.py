@@ -4,9 +4,9 @@ from typing import Optional, List
 import numpy as np
 import pandas as pd
 
+from modules.global_utils import FindingResult
 from modules.sales import constants
 from modules.sales.findings.finding import Finding
-from modules.sales.utils import FindingResult
 
 
 class CrossSellingFinding(Finding):
@@ -117,4 +117,3 @@ class CrossSellingFinding(Finding):
     @staticmethod
     def _format_opportunities(opportunities: dict) -> str:
         return f"Cross selling opportunities for: {'; '.join([f'{k} ({v})' for k, v in opportunities.items()])}" if opportunities else ""
-

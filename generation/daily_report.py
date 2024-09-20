@@ -2,240 +2,277 @@ import jinja2
 
 template = jinja2.Template(
     """
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>MSD</title>
 </head>
 <style>
-    @page {
-        size: A4;
-        margin: 0 auto;
-    }
+@page {
+    size: A4;
+    margin: 0 auto;
+}
 
-    * {
-        box-sizing: border-box;
-    }
+* {
+    box-sizing: border-box;
+}
 
-    html, body {
-        width: 210mm;
-        height: 297mm;
-        margin: 0 auto;
-    }
+html, body {
+    width: 210mm;
+    height: 297mm;
+    margin: 0 auto;
+}
 
-    body {
-        font-family: Inter, sans-serif;
-        font-size: 14px;
-        line-height: 1.4;
-        color: #1A1C21;
-    }
+body {
+    font-family: Inter, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #1A1C21;
+}
 
-    body a {
-        color: inherit;
-        text-decoration: none;
-    }
+body a {
+    color: inherit;
+    text-decoration: none;
+}
 
-    .round-box {
-        display: flex;
-        align-items: center;
-        padding: 10px 14px;
-        border-radius: 8px;
-        text-decoration: none;
-    }
+.round-box:not(table) {
+    display: flex;
+    align-items: flex-start;
+    padding: 10px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+}
 
-    .round-box--success {
-        background-color: #DEFAF7;
-        color: #009484;
-    }
+table.round-box {
+    border-radius: 8px;
+}
 
-    .round-box--secondary {
-        background-color: #DEE2FA;
-        color: #002994;
-    }
+table.round-box td {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
 
-    .round-box--warning {
-        background-color: #FAE1CF;
-        color: #E46A11;
-    }
+table.round-box td:first-child {
+    padding-left: 14px;
+}
 
-    .round-box .icon {
-        margin-right: 8px;
-    }
+table.round-box td:last-child {
+    padding-right: 14px;
+}
 
-    .icon-circle {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+table.round-box td:nth-child(2) {
+    padding-left: 8px;
+}
 
-    .icon {
-        display: block;
-        width: 20px;
-        height: 20px;
-    }
+.round-box--success {
+    background-color: #DEFAF7;
+    color: #009484;
+}
 
-    .card {
-        border: 1px solid #E0E2E7;
-        border-radius: 8px;
-        box-shadow: 0 1.5px 2px 0 #1018281A;
-    }
+.round-box--secondary {
+    background-color: #DEE2FA;
+    color: #002994;
+}
 
-    .card-inner {
-        padding: 20px;
-    }
+.round-box--warning {
+    background-color: #FAE1CF;
+    color: #E46A11;
+}
 
-    .card-price {
-        font-size: 24px;
-        line-height: 32px;
-    }
+.icon-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    .card-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 16px;
-    }
+.icon {
+    flex: 0 0 auto;
+    display: block;
+    width: 20px;
+    height: 20px;
+}
 
-    .card-title {
-        margin-bottom: 8px;
-        color: #667085;
-        font-size: 16px;
-        line-height: 24px;
-    }
+.card {
+    border: 1px solid #E0E2E7;
+    border-radius: 8px;
+    box-shadow: 0 1.5px 2px 0 #1018281A;
+}
 
-    .card-footer {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
+.card__table-header-wrapper {
+    padding: 18px 20px;
+}
 
-    .badge {
-        display: inline-flex;
-        padding: 2px 6px;
-        border-radius: 100px;
-        font-weight: 600;
-        font-size: 12px;
-        line-height: 18px;
-    }
+.card__table-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 12px;
+    align-items: center;
+}
 
-    .color-secondary {
-        color: #667085;
-    }
+.card-inner {
+    padding: 20px;
+}
 
-    .badge--success {
-        color: #0D894F;
-        background-color: #E7F4EE;
-    }
+.card-price {
+    font-size: 24px;
+    line-height: 32px;
+}
 
-    .badge--danger {
-        color: #F04438;
-        background-color: #FEEDEC;
-    }
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
 
-    .badge--neutral {
-        color: #667085;
-        background-color: #F0F1F3;
-    }
+.card-title {
+    margin-bottom: 8px;
+    color: #667085;
+    font-size: 16px;
+    line-height: 24px;
+}
 
-    .dot {
-        display: inline-block;
-        width: 4px;
-        height: 4px;
-        background-color: #C2C6CE;
-        border-radius: 50%;
-    }
+.card-footer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
-    hr {
-        margin: 1em 0;
-        border: 1px solid #f0f1f3;
-        border-bottom: none;
-    }
+.badge {
+    display: inline;
+    padding: 2px 6px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 18px;
+}
 
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-        border-spacing: 0;
-        color: #333843;
-    }
+.color-secondary {
+    color: #667085;
+}
 
-    .table th,
-    .table td {
-        padding: 18px 20px;
-        border-bottom: 1px solid #F0F1F3;
-        text-align: left;
-    }
+.badge--success {
+    color: #0D894F;
+    background-color: #E7F4EE;
+}
 
-    .table tbody tr:last-child td {
-        border-bottom: none;
-    }
+.badge--danger {
+    color: #F04438;
+    background-color: #FEEDEC;
+}
 
-    .table th {
-        background-color: #F9F9FC;
-        font-weight: 500;
-    }
+.badge--neutral {
+    color: #667085;
+    background-color: #F0F1F3;
+}
 
-    ul {
-        margin: 0;
-        padding-left: 20px;
-    }
+.dot {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    background-color: #C2C6CE;
+    border-radius: 50%;
+}
 
-    ul li + li {
-        margin-top: 20px;
-    }
+hr {
+    margin: 1em 0;
+    border: 1px solid #f0f1f3;
+    border-bottom: none;
+}
 
-    .avoid-page-break-inside {
-        page-break-inside: avoid
-    }
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    color: #333843;
+}
 
-    header,
-    footer {
-        position: fixed;
-    }
+.table th,
+.table td {
+    padding: 18px 20px;
+    border-bottom: 1px solid #F0F1F3;
+    text-align: left;
+}
 
-    header {
-        padding: .5cm;
-        background: #fff;
-    }
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
 
-    .header-space {
-        height: 110px;
-    }
+.table th {
+    background-color: #F9F9FC;
+    font-weight: 500;
+}
 
-    .footer-space {
-        height: 100px;
-    }
+ul {
+    margin: 0;
+    padding-left: 20px;
+}
 
-    header {
-        top: 0;
-        right: 0;
-        left: 0;
-    }
+ul li + li {
+    margin-top: 20px;
+}
 
-    footer {
-        right: 0;
-        bottom: 0;
-        left: 0;
-    }
+.avoid-page-break-inside {
+    page-break-inside: avoid
+}
 
-    main {
-        padding: 0 .5cm;
-    }
+header,
+footer {
+    position: fixed;
+}
 
-    .no-split {
-        page-break-inside: avoid;
-    }
+header {
+    padding: .5cm;
+    background: #fff;
+}
+
+.header-space {
+    height: 110px;
+}
+
+.footer-space {
+    height: 100px;
+}
+
+header {
+    top: 0;
+    right: 0;
+    left: 0;
+}
+
+footer {
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+main {
+    padding: 0 .5cm;
+}
+
+.no-split {
+    page-break-inside: avoid;
+}
+
+.heading {
+    display: grid;
+    align-items: flex-start;
+    gap: 16px;
+}
 </style>
 <body>
 <div>
     <div>
         <header>
-            <div style="float: right; text-align: right; width: 134px;">
-
-                <svg style="display: block; width: 134px; height: 50px;" width="134" height="50" viewBox="0 0 134 50"
+            <div style="float: left; text-align: left; width: 134px;">
+                <h4 style="color: #876000">Confidential</h4>
+            </div>
+            <div style="text-align: right;">
+                <svg style="width: 134px; height: 50px;" width="134" height="50" viewBox="0 0 134 50"
                      fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12.5168 12.5C12.5168 9.18479 13.8356 6.00537 16.1829 3.66117C18.5303 1.31696 21.714 0 25.0337 0C28.3533 0 31.537 1.31696 33.8844 3.66117C36.2318 6.00537 37.5505 9.18479 37.5505 12.5H12.5168ZM12.5168 37.5C12.5168 34.1848 13.8356 31.0054 16.1829 28.6612C18.5303 26.317 21.714 25 25.0337 25C21.714 25 18.5303 23.683 16.1829 21.3388C13.8356 18.9946 12.5168 15.8152 12.5168 12.5C9.19716 12.5 6.01346 13.817 3.6661 16.1612C1.31873 18.5054 0 21.6848 0 25C0 28.3152 1.31873 31.4946 3.6661 33.8388C6.01346 36.183 9.19716 37.5 12.5168 37.5ZM12.5168 37.5C12.5168 40.8152 13.8356 43.9946 16.1829 46.3388C18.5303 48.683 21.714 50 25.0337 50C28.3533 50 31.537 48.683 33.8844 46.3388C36.2318 43.9946 37.5505 40.8152 37.5505 37.5H12.5168ZM25.0337 25C28.3533 25 31.537 26.317 33.8844 28.6612C36.2318 31.0054 37.5505 34.1848 37.5505 37.5C39.1942 37.5 40.8219 37.1767 42.3405 36.5485C43.8591 35.9203 45.2389 34.9996 46.4012 33.8388C47.5635 32.6781 48.4855 31.3001 49.1145 29.7835C49.7436 28.267 50.0673 26.6415 50.0673 25C50.0673 23.3585 49.7436 21.733 49.1145 20.2165C48.4855 18.6999 47.5635 17.3219 46.4012 16.1612C45.2389 15.0004 43.8591 14.0797 42.3405 13.4515C40.8219 12.8233 39.1942 12.5 37.5505 12.5C37.5505 15.8152 36.2318 18.9946 33.8844 21.3388C31.537 23.683 28.3533 25 25.0337 25Z"
                           fill="#009484"/>
@@ -243,291 +280,281 @@ template = jinja2.Template(
                           fill="#243444"/>
                 </svg>
 
-                <small style="display: block; font-size: 12px; margin-top: 4px;">
-                    Powered by ai.MATE
-                </small>
             </div>
         </header>
-        <table>
+        <table style="width: 100%;">
             <thead>
-            <tr>
-                <td>
-                    <div class="header-space">&nbsp;</div>
-                </td>
-            </tr>
+                <tr>
+                    <td>
+                        <div class="header-space">&nbsp;</div>
+                    </td>
+                </tr>
             </thead>
             <tbody>
-            <tr>
-                <td>
-                    <main>
-                        <div
-                                style="flex: 0 0 auto; width: 100%; display: flex; flex-direction: column; gap: 24px; margin: 0 0 30px;"
-                        >
-                            <div style="display: flex; gap: 16px;">
-                                <div
-                                        style="width: 16px; height: 16px; margin: 7px 4px 0 0; border-radius: 4px; background-color: #009484;"
-                                ></div>
-                                <div style="flex: 1 1 auto;">
-                                    <div style="margin-bottom: 7px; font-size: 20px; line-height: 30px;">
-                                        Meeting with {{hcp_name}}
-                                    </div>
+                <tr>
+                    <td>
+                        <main>
+                            <div
+                                    style="display: grid; gap: 24px; margin: 0 0 30px;"
+                            >
+                                <div class="heading" style="grid-template-columns: auto 1fr 1fr;">
                                     <div
-                                            class="color-secondary"
-                                            style="display: flex; align-items: center; gap: 8px; font-weight: 400;"
-                                    >
-                                        {{planed_visit_date}}
-                                        <span class="dot"></span>
-                                        {{account_name}}
-                                    </div>
-                                </div>
-                                <div>
-                                    <a
-                                            href="{{account_360_url}}"
-                                            class="round-box round-box--success"
-                                    >
-                                        Account360
-                                    </a>
-                                </div>
-                                <div>
-                                    <a
-                                            href="{{hcp_360_url}}"
-                                            class="round-box round-box--success"
-                                    >
-                                        HCP360
-                                    </a>
-                                </div>
-                                <div>
-                                    <a
-                                            href="{{google_map_url}}"
-                                            class="round-box round-box--warning"
-                                    >
-                                        Map
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; gap: 16px;">
-                                <div style="margin-top: 2px;">
-                                    <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                         xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M10.8333 5.83333C10.8333 6.29357 10.4602 6.66666 9.99999 6.66666C9.53975 6.66666 9.16666 6.29357 9.16666 5.83333C9.16666 5.37309 9.53975 5 9.99999 5C10.4602 5 10.8333 5.37309 10.8333 5.83333Z"
-                                              fill="#667085"/>
-                                        <path d="M9.99999 7.5C10.4602 7.5 10.8333 7.87309 10.8333 8.33333V14.1667C10.8333 14.6269 10.4602 15 9.99999 15C9.53975 15 9.16666 14.6269 9.16666 14.1667V8.33333C9.16666 7.87309 9.53975 7.5 9.99999 7.5Z"
-                                              fill="#667085"/>
-                                        <path fill-rule="evenodd" clip-rule="evenodd"
-                                              d="M18.3333 10C18.3333 14.6024 14.6024 18.3333 9.99999 18.3333C5.39762 18.3333 1.66666 14.6024 1.66666 10C1.66666 5.39762 5.39762 1.66666 9.99999 1.66666C14.6024 1.66666 18.3333 5.39762 18.3333 10ZM16.6667 10C16.6667 13.6819 13.6819 16.6667 9.99999 16.6667C6.31809 16.6667 3.33332 13.6819 3.33332 10C3.33332 6.3181 6.31809 3.33333 9.99999 3.33333C13.6819 3.33333 16.6667 6.3181 16.6667 10Z"
-                                              fill="#667085"/>
-                                    </svg>
-
-                                </div>
-                                <div>
-                                    <div style="margin-bottom: 4px; font-size: 16px; line-height: 24px;">
-                                        Address
-                                    </div>
-                                    <div class="color-secondary">
-                                        {{contact_address}}
-                                        <br>
-                                        <a
-                                                href="tel:{{contact_phone}}"
-                                                style="text-decoration: underline;"
+                                            style="width: 16px; height: 16px; margin: 7px 4px 0 0; border-radius: 4px; background-color: #009484;"
+                                    ></div>
+                                    <div style="flex: 1 1 auto;">
+                                        <div style="margin-bottom: 7px; font-size: 20px; line-height: 30px;">
+                                            Meeting with {{ hcp_name }}
+                                        </div>
+                                        <div
+                                                class="color-secondary"
+                                                style="display: flex; flex-wrap: wrap; align-items: center; font-weight: 400;"
                                         >
-                                            {{contact_phone}}
+                                            {{ planed_visit_date }}
+                                            <span class="dot" style="margin: 0 8px;"></span>
+                                            <strong>{{ account_name }}</strong>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; flex-wrap: wrap; justify-content:flex-end;">
+                                        <a
+                                                target="_blank" href="{{account_360_url}}"
+                                                class="round-box round-box--success"
+                                        >
+                                            Account360
                                         </a>
-                                        <br>
                                         <a
-                                                href="{{contact_web}}"
-                                                style="text-decoration: underline;"
+                                                target="_blank" href="{{hcp_360_url}}"
+                                                class="round-box round-box--success"
+                                                style="margin-left: 16px;"
                                         >
-                                            {{contact_web}}
+                                            HCP360
+                                        </a>
+                                        <a
+                                                target="_blank" href="{{google_map_url}}"
+                                                class="round-box round-box--warning"
+                                                style="margin-left: 16px;"
+                                        >
+                                            Map
                                         </a>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div style="display:flex; gap: 14px;">
-                            {% for finding in findings %}
-
-                            {% if finding.type == 'cross_selling_opportunities' %}
-                            <div
-                                    class="round-box round-box--secondary"
-                            >
-                                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M17.0429 5.20711C16.6524 4.81658 16.6524 4.18342 17.0429 3.79289C17.4334 3.40237 18.0666 3.40237 18.4571 3.79289L21.3107 6.64645C21.5059 6.84171 21.5059 7.15829 21.3107 7.35355L18.4571 10.2071C18.0666 10.5976 17.4334 10.5976 17.0429 10.2071C16.6524 9.81658 16.6524 9.18342 17.0429 8.79289L17.8358 8H17.2857C16.7384 8 16.2149 8.22433 15.8374 8.62069L13.9573 10.5948C13.7603 10.8017 13.4302 10.8017 13.2332 10.5948L12.5427 9.86983C12.3588 9.67672 12.3588 9.37328 12.5427 9.18017L14.3892 7.24138C15.1441 6.44866 16.191 6 17.2857 6H17.8358L17.0429 5.20711Z"
-                                          fill="#17163A"/>
-                                    <path d="M17.0429 15.2071C16.6524 14.8166 16.6524 14.1834 17.0429 13.7929C17.4334 13.4024 18.0666 13.4024 18.4571 13.7929L21.3107 16.6464C21.5059 16.8417 21.5059 17.1583 21.3107 17.3536L18.4571 20.2071C18.0666 20.5976 17.4334 20.5976 17.0429 20.2071C16.6524 19.8166 16.6524 19.1834 17.0429 18.7929L17.8358 18H17.2857C16.191 18 15.1441 17.5513 14.3892 16.7586L11.2381 13.45L7.61084 17.2586C6.85587 18.0513 5.80899 18.5 4.71429 18.5H3.5C2.94772 18.5 2.5 18.0523 2.5 17.5C2.5 16.9477 2.94772 16.5 3.5 16.5H4.71429C5.26164 16.5 5.78508 16.2757 6.16256 15.8793L9.85714 12L6.16256 8.12069C5.78508 7.72433 5.26164 7.5 4.71429 7.5H3.5C2.94772 7.5 2.5 7.05229 2.5 6.5C2.5 5.94771 2.94772 5.5 3.5 5.5H4.71429C5.80899 5.5 6.85587 5.94866 7.61084 6.74138L15.8374 15.3793C16.2149 15.7757 16.7384 16 17.2857 16H17.8358L17.0429 15.2071Z"
-                                          fill="#002994"/>
-                                </svg>
-
-                                {{finding.text}}
-                            </div>
-                            {% elif finding.type == 'msd_orders_recommendations' %}
-                            <div
-                                    class="round-box round-box--secondary"
-                            >
-                                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M17.0429 5.20711C16.6524 4.81658 16.6524 4.18342 17.0429 3.79289C17.4334 3.40237 18.0666 3.40237 18.4571 3.79289L21.3107 6.64645C21.5059 6.84171 21.5059 7.15829 21.3107 7.35355L18.4571 10.2071C18.0666 10.5976 17.4334 10.5976 17.0429 10.2071C16.6524 9.81658 16.6524 9.18342 17.0429 8.79289L17.8358 8H17.2857C16.7384 8 16.2149 8.22433 15.8374 8.62069L13.9573 10.5948C13.7603 10.8017 13.4302 10.8017 13.2332 10.5948L12.5427 9.86983C12.3588 9.67672 12.3588 9.37328 12.5427 9.18017L14.3892 7.24138C15.1441 6.44866 16.191 6 17.2857 6H17.8358L17.0429 5.20711Z"
-                                          fill="#17163A"/>
-                                    <path d="M17.0429 15.2071C16.6524 14.8166 16.6524 14.1834 17.0429 13.7929C17.4334 13.4024 18.0666 13.4024 18.4571 13.7929L21.3107 16.6464C21.5059 16.8417 21.5059 17.1583 21.3107 17.3536L18.4571 20.2071C18.0666 20.5976 17.4334 20.5976 17.0429 20.2071C16.6524 19.8166 16.6524 19.1834 17.0429 18.7929L17.8358 18H17.2857C16.191 18 15.1441 17.5513 14.3892 16.7586L11.2381 13.45L7.61084 17.2586C6.85587 18.0513 5.80899 18.5 4.71429 18.5H3.5C2.94772 18.5 2.5 18.0523 2.5 17.5C2.5 16.9477 2.94772 16.5 3.5 16.5H4.71429C5.26164 16.5 5.78508 16.2757 6.16256 15.8793L9.85714 12L6.16256 8.12069C5.78508 7.72433 5.26164 7.5 4.71429 7.5H3.5C2.94772 7.5 2.5 7.05229 2.5 6.5C2.5 5.94771 2.94772 5.5 3.5 5.5H4.71429C5.80899 5.5 6.85587 5.94866 7.61084 6.74138L15.8374 15.3793C16.2149 15.7757 16.7384 16 17.2857 16H17.8358L17.0429 15.2071Z"
-                                          fill="#002994"/>
-                                </svg>
-
-                                {{finding.text}}
-                            </div>
-                            {% elif finding.type == 'high_performing_account' %}
-                            <div
-                                    class="round-box round-box--success"
-                            >
-                                <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                     xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M17.9167 5.83333C18.1468 5.83333 18.3333 6.01988 18.3333 6.24999V9.99999C18.3333 10.4602 17.9602 10.8333 17.5 10.8333C17.0398 10.8333 16.6667 10.4602 16.6667 9.99999V8.67851L12.5505 12.7946C12.0624 13.2828 11.2709 13.2828 10.7828 12.7946L8.33332 10.3452L3.08925 15.5893C2.76381 15.9147 2.23617 15.9147 1.91073 15.5893C1.5853 15.2638 1.5853 14.7362 1.91073 14.4107L7.44944 8.87203C7.9376 8.38388 8.72905 8.38388 9.21721 8.87203L11.6667 11.3215L15.4881 7.49999H14.1667C13.7064 7.49999 13.3333 7.1269 13.3333 6.66666C13.3333 6.20642 13.7064 5.83333 14.1667 5.83333H17.9167Z"
-                                          fill="#009484"/>
-                                </svg>
-
-                                {{finding.text}}
-                            </div>
-                            {% endif %}
-
-                            {% endfor %}
-                        </div>
-
-                        <div style="margin-top: 30px;"></div>
-
-                        <div style="display: flex; gap: 24px;">
-                            <div
-                                    style="flex: 0 0 auto; width: 100%; display: flex; flex-direction: column; gap: 24px;"
-                            >
-                                <div class="card no-split">
-                                    <div style="padding: 18px 20px;">
-                                        <div
-                                                style="display: flex; align-items: center; justify-content: space-between;"
-                                        >
-                                            <div style="display: flex; align-items: center; gap: 12px;">
-                                                <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                                     xmlns="http://www.w3.org/2000/svg">
-                                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                                          d="M2.5 5C2.5 3.61929 3.61929 2.5 5 2.5H15C16.3807 2.5 17.5 3.61929 17.5 5V15C17.5 16.3807 16.3807 17.5 15 17.5H5C3.61929 17.5 2.5 16.3807 2.5 15V5ZM15 4.16667H13.125V6.875H15.8333V5C15.8333 4.53976 15.4602 4.16667 15 4.16667ZM11.4583 4.16667V6.875H8.54167V4.16667H11.4583ZM11.4583 8.54167H8.54167V11.4583H11.4583V8.54167ZM11.4583 13.125H8.54167V15.8333H11.4583V13.125ZM6.875 11.4583V8.54167H4.16667V11.4583H6.875ZM4.16667 13.125H6.875V15.8333H5C4.53976 15.8333 4.16667 15.4602 4.16667 15V13.125ZM15.8333 13.125V15C15.8333 15.4602 15.4602 15.8333 15 15.8333H13.125V13.125H15.8333ZM15.8333 11.4583H13.125V8.54167H15.8333V11.4583ZM6.875 4.16667V6.875H4.16667V5C4.16667 4.53976 4.53976 4.16667 5 4.16667H6.875Z"
-                                                          fill="#667085"/>
-                                                </svg>
-
-                                                <div style="font-size: 18px;">
-                                                    Account Product Performance
-                                                </div>
-                                            </div>
-                                            <div style="display: flex; align-items: center; gap: 12px;">
-                                                <div class="round-box round-box--success">
-                                                    {{report_data_month}}
-                                                </div>
-                                                <a href="{{qlik_sense_url}}">
-                                                    <svg class="icon" width="24" height="24" viewBox="0 0 24 24"
-                                                         fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M15.9497 9.46447V15.5356C15.9497 16.0878 16.3975 16.5356 16.9497 16.5356C17.502 16.5356 17.9497 16.0878 17.9497 15.5356L17.9497 6.55027C17.9497 6.27413 17.7259 6.05027 17.4497 6.05027L16.9545 6.05027C16.9513 6.05026 16.9481 6.05026 16.9449 6.05027L8.46445 6.05027C7.91217 6.05027 7.46445 6.49799 7.46445 7.05027C7.46446 7.60256 7.91217 8.05027 8.46445 8.05027H14.5355L6.34313 16.2427C5.9526 16.6332 5.9526 17.2663 6.34313 17.6569C6.73365 18.0474 7.36681 18.0474 7.75734 17.6569L15.9497 9.46447Z"
-                                                              fill="#667085"/>
-                                                    </svg>
-
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <table class="table">
-                                        <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Moving annual</th>
-                                            <th>Rolling quarter</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for sale in sales %}
-                                        <tr>
-                                            <td>{{sale.product_name}}</td>
-
-                                            <td class="color-secondary">
-                                                <span>{{sale.mat}}</span>
-                                                <span class="badge badge--success">
-                                        {{sale.mat_change}}
-                                    </span>
-                                            </td>
-                                            <td class="color-secondary">
-                                                <span>{{sale.rolq}}</span>
-                                                <span class="badge badge--success">
-                                        {{sale.rolq_change}}
-                                    </span>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div class="card no-split">
-                                    <div style="padding: 18px 20px;">
-                                        <div
-                                                style="display: flex; align-items: center; justify-content: space-between;"
-                                        >
-                                            <div style="display: flex; align-items: center; gap: 12px;">
-                                                <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                                     xmlns="http://www.w3.org/2000/svg">
-                                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                                          d="M2.5 5C2.5 3.61929 3.61929 2.5 5 2.5H15C16.3807 2.5 17.5 3.61929 17.5 5V15C17.5 16.3807 16.3807 17.5 15 17.5H5C3.61929 17.5 2.5 16.3807 2.5 15V5ZM15 4.16667H13.125V6.875H15.8333V5C15.8333 4.53976 15.4602 4.16667 15 4.16667ZM11.4583 4.16667V6.875H8.54167V4.16667H11.4583ZM11.4583 8.54167H8.54167V11.4583H11.4583V8.54167ZM11.4583 13.125H8.54167V15.8333H11.4583V13.125ZM6.875 11.4583V8.54167H4.16667V11.4583H6.875ZM4.16667 13.125H6.875V15.8333H5C4.53976 15.8333 4.16667 15.4602 4.16667 15V13.125ZM15.8333 13.125V15C15.8333 15.4602 15.4602 15.8333 15 15.8333H13.125V13.125H15.8333ZM15.8333 11.4583H13.125V8.54167H15.8333V11.4583ZM6.875 4.16667V6.875H4.16667V5C4.16667 4.53976 4.53976 4.16667 5 4.16667H6.875Z"
-                                                          fill="#667085"/>
-                                                </svg>
-
-                                                <div style="font-size: 18px;">
-                                                    Engagement table
-                                                </div>
-                                            </div>
-                                            <div style="display: flex; align-items: center; gap: 12px;">
-                                                <div class="round-box round-box--success">
-                                                    {{report_data_month}}
-                                                </div>
-                                                <a href="{{qlik_sense_url}}">
-                                                    <svg class="icon" width="24" height="24" viewBox="0 0 24 24"
-                                                         fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M15.9497 9.46447V15.5356C15.9497 16.0878 16.3975 16.5356 16.9497 16.5356C17.502 16.5356 17.9497 16.0878 17.9497 15.5356L17.9497 6.55027C17.9497 6.27413 17.7259 6.05027 17.4497 6.05027L16.9545 6.05027C16.9513 6.05026 16.9481 6.05026 16.9449 6.05027L8.46445 6.05027C7.91217 6.05027 7.46445 6.49799 7.46445 7.05027C7.46446 7.60256 7.91217 8.05027 8.46445 8.05027H14.5355L6.34313 16.2427C5.9526 16.6332 5.9526 17.2663 6.34313 17.6569C6.73365 18.0474 7.36681 18.0474 7.75734 17.6569L15.9497 9.46447Z"
-                                                              fill="#667085"/>
-                                                    </svg>
-
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <table class="table">
-                                        <thead>
-                                        <tr>
-                                            <th>Channel</th>
-                                            <th>Moving annual</th>
-                                            <th>Rolling quarter</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {% for interaction in interactions %}
-                                        <tr>
-                                            <td>{{interaction.channel}}</td>
-
-                                            <td class="color-secondary">
-                                                <span>{{interaction.mat}}</span>
-                                                <span class="badge badge--success">
-                                        {{interaction.mat_change}}
-                                    </span>
-                                            </td>
-                                            <td class="color-secondary">
-                                                <span>{{interaction.rolq}}</span>
-                                                <span class="badge badge--neutral">
-                                        {{interaction.rolq_change}}
-                                    </span>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                {% if trends is defined and trends|length > 0 %}
-                                <div style="display: flex; gap: 16px;">
+                                <div style="display: grid; grid-template-columns: auto 1fr; gap: 16px;">
                                     <div style="margin-top: 2px;">
+                                        <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none"
+                                             xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M10.8333 5.83333C10.8333 6.29357 10.4602 6.66666 9.99999 6.66666C9.53975 6.66666 9.16666 6.29357 9.16666 5.83333C9.16666 5.37309 9.53975 5 9.99999 5C10.4602 5 10.8333 5.37309 10.8333 5.83333Z"
+                                                  fill="#667085"/>
+                                            <path d="M9.99999 7.5C10.4602 7.5 10.8333 7.87309 10.8333 8.33333V14.1667C10.8333 14.6269 10.4602 15 9.99999 15C9.53975 15 9.16666 14.6269 9.16666 14.1667V8.33333C9.16666 7.87309 9.53975 7.5 9.99999 7.5Z"
+                                                  fill="#667085"/>
+                                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                                  d="M18.3333 10C18.3333 14.6024 14.6024 18.3333 9.99999 18.3333C5.39762 18.3333 1.66666 14.6024 1.66666 10C1.66666 5.39762 5.39762 1.66666 9.99999 1.66666C14.6024 1.66666 18.3333 5.39762 18.3333 10ZM16.6667 10C16.6667 13.6819 13.6819 16.6667 9.99999 16.6667C6.31809 16.6667 3.33332 13.6819 3.33332 10C3.33332 6.3181 6.31809 3.33333 9.99999 3.33333C13.6819 3.33333 16.6667 6.3181 16.6667 10Z"
+                                                  fill="#667085"/>
+                                        </svg>
+
+                                    </div>
+                                    <div>
+                                        <div style="margin-bottom: 4px; font-size: 16px; line-height: 24px;">
+                                            Address
+                                        </div>
+                                        <div class="color-secondary">
+                                            {{ contact_address }}
+                                            <br>
+                                            <a
+                                                    target="_blank" href="tel:{{contact_phone}}"
+                                                    style="text-decoration: underline;"
+                                            >
+                                                {{ contact_phone }}
+                                            </a>
+                                            <br>
+                                            <a
+                                                    target="_blank" href="{{contact_web}}"
+                                                    style="text-decoration: underline;"
+                                            >
+                                                {{ contact_web }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; align-items: flex-start;">
+                            {% for finding in findings %}
+                            {% if finding.type == 'cross_selling_opportunities' %}
+                                <div style="margin-right: 14px;">
+                                    <table class="round-box round-box--secondary">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <svg class="icon" width="24" height="24" viewBox="0 0 24 24"
+                                                         fill="none"
+                                                         xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M17.0429 5.20711C16.6524 4.81658 16.6524 4.18342 17.0429 3.79289C17.4334 3.40237 18.0666 3.40237 18.4571 3.79289L21.3107 6.64645C21.5059 6.84171 21.5059 7.15829 21.3107 7.35355L18.4571 10.2071C18.0666 10.5976 17.4334 10.5976 17.0429 10.2071C16.6524 9.81658 16.6524 9.18342 17.0429 8.79289L17.8358 8H17.2857C16.7384 8 16.2149 8.22433 15.8374 8.62069L13.9573 10.5948C13.7603 10.8017 13.4302 10.8017 13.2332 10.5948L12.5427 9.86983C12.3588 9.67672 12.3588 9.37328 12.5427 9.18017L14.3892 7.24138C15.1441 6.44866 16.191 6 17.2857 6H17.8358L17.0429 5.20711Z"
+                                                              fill="#002994"/>
+                                                        <path d="M17.0429 15.2071C16.6524 14.8166 16.6524 14.1834 17.0429 13.7929C17.4334 13.4024 18.0666 13.4024 18.4571 13.7929L21.3107 16.6464C21.5059 16.8417 21.5059 17.1583 21.3107 17.3536L18.4571 20.2071C18.0666 20.5976 17.4334 20.5976 17.0429 20.2071C16.6524 19.8166 16.6524 19.1834 17.0429 18.7929L17.8358 18H17.2857C16.191 18 15.1441 17.5513 14.3892 16.7586L11.2381 13.45L7.61084 17.2586C6.85587 18.0513 5.80899 18.5 4.71429 18.5H3.5C2.94772 18.5 2.5 18.0523 2.5 17.5C2.5 16.9477 2.94772 16.5 3.5 16.5H4.71429C5.26164 16.5 5.78508 16.2757 6.16256 15.8793L9.85714 12L6.16256 8.12069C5.78508 7.72433 5.26164 7.5 4.71429 7.5H3.5C2.94772 7.5 2.5 7.05229 2.5 6.5C2.5 5.94771 2.94772 5.5 3.5 5.5H4.71429C5.80899 5.5 6.85587 5.94866 7.61084 6.74138L15.8374 15.3793C16.2149 15.7757 16.7384 16 17.2857 16H17.8358L17.0429 15.2071Z"
+                                                              fill="#002994"/>
+                                                    </svg>
+                                                </td>
+                                                <td>{{ finding.text }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% elif finding.type == 'msd_orders_recommendations' %}
+                                <div style="margin-right: 14px;">
+                                    <table class="round-box round-box--secondary">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <svg class="icon" width="24" height="24" viewBox="0 0 24 24"
+                                                         fill="none"
+                                                         xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M17.0429 5.20711C16.6524 4.81658 16.6524 4.18342 17.0429 3.79289C17.4334 3.40237 18.0666 3.40237 18.4571 3.79289L21.3107 6.64645C21.5059 6.84171 21.5059 7.15829 21.3107 7.35355L18.4571 10.2071C18.0666 10.5976 17.4334 10.5976 17.0429 10.2071C16.6524 9.81658 16.6524 9.18342 17.0429 8.79289L17.8358 8H17.2857C16.7384 8 16.2149 8.22433 15.8374 8.62069L13.9573 10.5948C13.7603 10.8017 13.4302 10.8017 13.2332 10.5948L12.5427 9.86983C12.3588 9.67672 12.3588 9.37328 12.5427 9.18017L14.3892 7.24138C15.1441 6.44866 16.191 6 17.2857 6H17.8358L17.0429 5.20711Z"
+                                                              fill="#002994"/>
+                                                        <path d="M17.0429 15.2071C16.6524 14.8166 16.6524 14.1834 17.0429 13.7929C17.4334 13.4024 18.0666 13.4024 18.4571 13.7929L21.3107 16.6464C21.5059 16.8417 21.5059 17.1583 21.3107 17.3536L18.4571 20.2071C18.0666 20.5976 17.4334 20.5976 17.0429 20.2071C16.6524 19.8166 16.6524 19.1834 17.0429 18.7929L17.8358 18H17.2857C16.191 18 15.1441 17.5513 14.3892 16.7586L11.2381 13.45L7.61084 17.2586C6.85587 18.0513 5.80899 18.5 4.71429 18.5H3.5C2.94772 18.5 2.5 18.0523 2.5 17.5C2.5 16.9477 2.94772 16.5 3.5 16.5H4.71429C5.26164 16.5 5.78508 16.2757 6.16256 15.8793L9.85714 12L6.16256 8.12069C5.78508 7.72433 5.26164 7.5 4.71429 7.5H3.5C2.94772 7.5 2.5 7.05229 2.5 6.5C2.5 5.94771 2.94772 5.5 3.5 5.5H4.71429C5.80899 5.5 6.85587 5.94866 7.61084 6.74138L15.8374 15.3793C16.2149 15.7757 16.7384 16 17.2857 16H17.8358L17.0429 15.2071Z"
+                                                              fill="#002994"/>
+                                                    </svg>
+                                                </td>
+                                                <td>{{ finding.text }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% elif finding.type == 'high_performing_account' %}
+                                <div style="margin-right: 14px;">
+                                    <table class="round-box round-box--success">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <svg class="icon" width="20" height="20" viewBox="0 0 20 20"
+                                                         fill="none"
+                                                         xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M17.9167 5.83333C18.1468 5.83333 18.3333 6.01988 18.3333 6.24999V9.99999C18.3333 10.4602 17.9602 10.8333 17.5 10.8333C17.0398 10.8333 16.6667 10.4602 16.6667 9.99999V8.67851L12.5505 12.7946C12.0624 13.2828 11.2709 13.2828 10.7828 12.7946L8.33332 10.3452L3.08925 15.5893C2.76381 15.9147 2.23617 15.9147 1.91073 15.5893C1.5853 15.2638 1.5853 14.7362 1.91073 14.4107L7.44944 8.87203C7.9376 8.38388 8.72905 8.38388 9.21721 8.87203L11.6667 11.3215L15.4881 7.49999H14.1667C13.7064 7.49999 13.3333 7.1269 13.3333 6.66666C13.3333 6.20642 13.7064 5.83333 14.1667 5.83333H17.9167Z"
+                                                              fill="#009484"/>
+                                                    </svg>
+                                                </td>
+                                                <td>{{ finding.text }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% elif finding.type == 'cantonal_program_recommendation' %}
+                                <div style="margin-right: 14px;">
+                                    <table class="round-box round-box--success">
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <svg class="icon" width="20" height="20" viewBox="0 0 20 20"
+                                                         fill="none"
+                                                         xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M17.9167 5.83333C18.1468 5.83333 18.3333 6.01988 18.3333 6.24999V9.99999C18.3333 10.4602 17.9602 10.8333 17.5 10.8333C17.0398 10.8333 16.6667 10.4602 16.6667 9.99999V8.67851L12.5505 12.7946C12.0624 13.2828 11.2709 13.2828 10.7828 12.7946L8.33332 10.3452L3.08925 15.5893C2.76381 15.9147 2.23617 15.9147 1.91073 15.5893C1.5853 15.2638 1.5853 14.7362 1.91073 14.4107L7.44944 8.87203C7.9376 8.38388 8.72905 8.38388 9.21721 8.87203L11.6667 11.3215L15.4881 7.49999H14.1667C13.7064 7.49999 13.3333 7.1269 13.3333 6.66666C13.3333 6.20642 13.7064 5.83333 14.1667 5.83333H17.9167Z"
+                                                              fill="#009484"/>
+                                                    </svg>
+                                                </td>
+                                                <td>{{ finding.text }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endif %}
+                            {% endfor %}
+                            </div>
+
+                            <div style="margin-top: 30px;"></div>
+
+                            <div
+                                    style="display: grid; gap: 24px;"
+                            >
+                                <div class="card no-split">
+                                    <div class="card__table-header-wrapper">
+                                        <div class="card__table-header">
+                                            <svg class="icon" width="20" height="20" viewBox="0 0 20 20"
+                                                 fill="none"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                      d="M2.5 5C2.5 3.61929 3.61929 2.5 5 2.5H15C16.3807 2.5 17.5 3.61929 17.5 5V15C17.5 16.3807 16.3807 17.5 15 17.5H5C3.61929 17.5 2.5 16.3807 2.5 15V5ZM15 4.16667H13.125V6.875H15.8333V5C15.8333 4.53976 15.4602 4.16667 15 4.16667ZM11.4583 4.16667V6.875H8.54167V4.16667H11.4583ZM11.4583 8.54167H8.54167V11.4583H11.4583V8.54167ZM11.4583 13.125H8.54167V15.8333H11.4583V13.125ZM6.875 11.4583V8.54167H4.16667V11.4583H6.875ZM4.16667 13.125H6.875V15.8333H5C4.53976 15.8333 4.16667 15.4602 4.16667 15V13.125ZM15.8333 13.125V15C15.8333 15.4602 15.4602 15.8333 15 15.8333H13.125V13.125H15.8333ZM15.8333 11.4583H13.125V8.54167H15.8333V11.4583ZM6.875 4.16667V6.875H4.16667V5C4.16667 4.53976 4.53976 4.16667 5 4.16667H6.875Z"
+                                                      fill="#667085"/>
+                                            </svg>
+                                            <div style="font-size: 18px;">
+                                                Account Product Performance
+                                            </div>
+                                            <div class="round-box round-box--success">
+                                                {{ report_data_month }}
+                                            </div>
+                                            <a target="_blank" href="{{qlik_sense_url}}">
+                                                <svg class="icon" width="24" height="24" viewBox="0 0 24 24"
+                                                     fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M15.9497 9.46447V15.5356C15.9497 16.0878 16.3975 16.5356 16.9497 16.5356C17.502 16.5356 17.9497 16.0878 17.9497 15.5356L17.9497 6.55027C17.9497 6.27413 17.7259 6.05027 17.4497 6.05027L16.9545 6.05027C16.9513 6.05026 16.9481 6.05026 16.9449 6.05027L8.46445 6.05027C7.91217 6.05027 7.46445 6.49799 7.46445 7.05027C7.46446 7.60256 7.91217 8.05027 8.46445 8.05027H14.5355L6.34313 16.2427C5.9526 16.6332 5.9526 17.2663 6.34313 17.6569C6.73365 18.0474 7.36681 18.0474 7.75734 17.6569L15.9497 9.46447Z"
+                                                          fill="#667085"/>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Moving annual</th>
+                                                <th>Rolling quarter</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% if sales|length == 0 %}
+                                            <tr>
+                                                <td colspan="3">
+                                                    No data available
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+
+                                        {% for sale in sales %}
+                                            <tr>
+                                                <td>{{ sale.product_name }}</td>
+
+                                                <td class="color-secondary">
+                                                    <span>
+                                                        {{ sale.mat }} CHF
+                                                    </span>
+
+                                                    {% if sale.mat_change > 0 %}
+                                                    <span class="badge badge--success">
+                                                        {{ sale.mat_change }} %
+                                                    </span>
+                                                    {% elif sale.mat_change == 0 %}
+                                                    <span class="badge badge--neutral">
+                                                        {{ sale.mat_change }} %
+                                                    </span>
+                                                    {% elif sale.mat_change < 0 %}
+                                                    <span class="badge badge--danger">
+                                                        {{ sale.mat_change }} %
+                                                    </span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="color-secondary">
+                                                    <span>
+                                                        {{ sale.rolq }} CHF
+                                                    </span>
+                                                    {% if sale.rolq_change > 0 %}
+                                                    <span class="badge badge--success">
+                                                        {{ sale.rolq_change }} %
+                                                    </span>
+                                                    {% elif sale.rolq_change == 0 %}
+                                                    <span class="badge badge--neutral">
+                                                        {{ sale.rolq_change }} %
+                                                    </span>
+                                                    {% elif sale.rolq_change < 0 %}
+                                                    <span class="badge badge--danger">
+                                                        {{ sale.rolq_change }} %
+                                                    </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {% if trends is defined and trends|length > 0 %}
+                                <div style="display: flex;">
+                                    <div style="margin: 2px 16px 0 0;">
                                         <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <g clip-path="url(#clip0_48_503)">
@@ -542,7 +569,7 @@ template = jinja2.Template(
                                         </svg>
 
                                     </div>
-                                    
+
                                     <div>
                                         <div style="margin-bottom: 4px; font-size: 16px; line-height: 24px;">
                                             Trends
@@ -551,7 +578,7 @@ template = jinja2.Template(
                                             <ul>
                                                 {% for trend in trends %}
                                                 <li>
-                                                    {{trend.text}}
+                                                    {{ trend.text }}
                                                 </li>
                                                 {% endfor %}
                                             </ul>
@@ -559,9 +586,92 @@ template = jinja2.Template(
                                     </div>
                                 </div>
                                 {% endif %}
+                                <div class="card no-split">
+                                    <div class="card__table-header-wrapper">
+                                        <div class="card__table-header">
+                                            <svg class="icon" width="20" height="20" viewBox="0 0 20 20"
+                                                 fill="none"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                      d="M2.5 5C2.5 3.61929 3.61929 2.5 5 2.5H15C16.3807 2.5 17.5 3.61929 17.5 5V15C17.5 16.3807 16.3807 17.5 15 17.5H5C3.61929 17.5 2.5 16.3807 2.5 15V5ZM15 4.16667H13.125V6.875H15.8333V5C15.8333 4.53976 15.4602 4.16667 15 4.16667ZM11.4583 4.16667V6.875H8.54167V4.16667H11.4583ZM11.4583 8.54167H8.54167V11.4583H11.4583V8.54167ZM11.4583 13.125H8.54167V15.8333H11.4583V13.125ZM6.875 11.4583V8.54167H4.16667V11.4583H6.875ZM4.16667 13.125H6.875V15.8333H5C4.53976 15.8333 4.16667 15.4602 4.16667 15V13.125ZM15.8333 13.125V15C15.8333 15.4602 15.4602 15.8333 15 15.8333H13.125V13.125H15.8333ZM15.8333 11.4583H13.125V8.54167H15.8333V11.4583ZM6.875 4.16667V6.875H4.16667V5C4.16667 4.53976 4.53976 4.16667 5 4.16667H6.875Z"
+                                                      fill="#667085"/>
+                                            </svg>
+                                            <div style="font-size: 18px;">
+                                                Engagement table
+                                            </div>
+                                            <div class="round-box round-box--success">
+                                                {{ report_data_month }}
+                                            </div>
+                                            <a target="_blank" href="{{qlik_sense_url}}">
+                                                <svg class="icon" width="24" height="24" viewBox="0 0 24 24"
+                                                     fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M15.9497 9.46447V15.5356C15.9497 16.0878 16.3975 16.5356 16.9497 16.5356C17.502 16.5356 17.9497 16.0878 17.9497 15.5356L17.9497 6.55027C17.9497 6.27413 17.7259 6.05027 17.4497 6.05027L16.9545 6.05027C16.9513 6.05026 16.9481 6.05026 16.9449 6.05027L8.46445 6.05027C7.91217 6.05027 7.46445 6.49799 7.46445 7.05027C7.46446 7.60256 7.91217 8.05027 8.46445 8.05027H14.5355L6.34313 16.2427C5.9526 16.6332 5.9526 17.2663 6.34313 17.6569C6.73365 18.0474 7.36681 18.0474 7.75734 17.6569L15.9497 9.46447Z"
+                                                          fill="#667085"/>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Channel</th>
+                                                <th>Moving annual</th>
+                                                <th>Rolling quarter</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% if interactions|length == 0 %}
+                                                <tr>
+                                                    <td colspan="3">
+                                                        No data available
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                            {% for interaction in interactions %}
+                                            <tr>
+                                                <td>{{ interaction.channel }}</td>
+
+                                                <td class="color-secondary">
+                                                    <span>{{ interaction.mat }}</span>
+                                                    {% if interaction.mat_change > 0 %}
+                                                    <span class="badge badge--success">
+                                                        {{ interaction.mat_change }} %
+                                                    </span>
+                                                    {% elif interaction.mat_change == 0 %}
+                                                    <span class="badge badge--neutral">
+                                                        {{ interaction.mat_change }} %
+                                                    </span>
+                                                    {% elif interaction.mat_change < 0 %}
+                                                    <span class="badge badge--danger">
+                                                        {{ interaction.mat_change }} %
+                                                    </span>
+                                                    {% endif %}
+
+                                                </td>
+                                                <td class="color-secondary">
+                                                    <span>{{ interaction.rolq }}</span>
+                                                    {% if interaction.rolq_change > 0 %}
+                                                    <span class="badge badge--success">
+                                                        {{ interaction.rolq_change }} %
+                                                    </span>
+                                                    {% elif interaction.rolq_change == 0 %}
+                                                    <span class="badge badge--neutral">
+                                                        {{ interaction.rolq_change }} %
+                                                    </span>
+                                                    {% elif interaction.rolq_change < 0 %}
+                                                    <span class="badge badge--danger">
+                                                        {{ interaction.rolq_change }} %
+                                                    </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                                 {% if insights is defined and insights|length > 0 %}
-                                <div style="display: flex; gap: 16px;">
-                                    <div style="margin-top: 2px;">
+                                <div style="display: flex;">
+                                    <div style="margin: 2px 16px 0 0;">
                                         <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none"
                                              xmlns="http://www.w3.org/2000/svg">
                                             <g clip-path="url(#clip0_48_503)">
@@ -582,132 +692,133 @@ template = jinja2.Template(
                                         </div>
                                         {% for insight in insights %}
                                         <p class="color-secondary">
-                                            {{insight}}
+                                            {{ insight }}
                                         </p>
                                         {% endfor %}
                                     </div>
-                                </div>                                    
+                                </div>
                                 {% endif %}
                                 <div class="card no-split">
-                                    <div style="padding: 18px 20px;">
-                                        <div
-                                                style="display: flex; align-items: center; justify-content: space-between;"
-                                        >
-                                            <div style="display: flex; align-items: center; gap: 12px;">
-                                                <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none"
-                                                     xmlns="http://www.w3.org/2000/svg">
-                                                    <path fill-rule="evenodd" clip-rule="evenodd"
-                                                          d="M2.5 5C2.5 3.61929 3.61929 2.5 5 2.5H15C16.3807 2.5 17.5 3.61929 17.5 5V15C17.5 16.3807 16.3807 17.5 15 17.5H5C3.61929 17.5 2.5 16.3807 2.5 15V5ZM15 4.16667H13.125V6.875H15.8333V5C15.8333 4.53976 15.4602 4.16667 15 4.16667ZM11.4583 4.16667V6.875H8.54167V4.16667H11.4583ZM11.4583 8.54167H8.54167V11.4583H11.4583V8.54167ZM11.4583 13.125H8.54167V15.8333H11.4583V13.125ZM6.875 11.4583V8.54167H4.16667V11.4583H6.875ZM4.16667 13.125H6.875V15.8333H5C4.53976 15.8333 4.16667 15.4602 4.16667 15V13.125ZM15.8333 13.125V15C15.8333 15.4602 15.4602 15.8333 15 15.8333H13.125V13.125H15.8333ZM15.8333 11.4583H13.125V8.54167H15.8333V11.4583ZM6.875 4.16667V6.875H4.16667V5C4.16667 4.53976 4.53976 4.16667 5 4.16667H6.875Z"
+                                    <div class="card__table-header-wrapper">
+                                        <div class="card__table-header">
+                                            <svg class="icon" width="20" height="20" viewBox="0 0 20 20"
+                                                 fill="none"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                      d="M2.5 5C2.5 3.61929 3.61929 2.5 5 2.5H15C16.3807 2.5 17.5 3.61929 17.5 5V15C17.5 16.3807 16.3807 17.5 15 17.5H5C3.61929 17.5 2.5 16.3807 2.5 15V5ZM15 4.16667H13.125V6.875H15.8333V5C15.8333 4.53976 15.4602 4.16667 15 4.16667ZM11.4583 4.16667V6.875H8.54167V4.16667H11.4583ZM11.4583 8.54167H8.54167V11.4583H11.4583V8.54167ZM11.4583 13.125H8.54167V15.8333H11.4583V13.125ZM6.875 11.4583V8.54167H4.16667V11.4583H6.875ZM4.16667 13.125H6.875V15.8333H5C4.53976 15.8333 4.16667 15.4602 4.16667 15V13.125ZM15.8333 13.125V15C15.8333 15.4602 15.4602 15.8333 15 15.8333H13.125V13.125H15.8333ZM15.8333 11.4583H13.125V8.54167H15.8333V11.4583ZM6.875 4.16667V6.875H4.16667V5C4.16667 4.53976 4.53976 4.16667 5 4.16667H6.875Z"
+                                                      fill="#667085"/>
+                                            </svg>
+
+                                            <div style="font-size: 18px;">
+                                                Other HCPs in account
+                                            </div>
+                                            <div class="round-box round-box--success">
+                                                {{ report_data_month }}
+                                            </div>
+                                            <a target="_blank" href="{{qlik_sense_url}}">
+                                                <svg class="icon" width="24" height="24" viewBox="0 0 24 24"
+                                                     fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M15.9497 9.46447V15.5356C15.9497 16.0878 16.3975 16.5356 16.9497 16.5356C17.502 16.5356 17.9497 16.0878 17.9497 15.5356L17.9497 6.55027C17.9497 6.27413 17.7259 6.05027 17.4497 6.05027L16.9545 6.05027C16.9513 6.05026 16.9481 6.05026 16.9449 6.05027L8.46445 6.05027C7.91217 6.05027 7.46445 6.49799 7.46445 7.05027C7.46446 7.60256 7.91217 8.05027 8.46445 8.05027H14.5355L6.34313 16.2427C5.9526 16.6332 5.9526 17.2663 6.34313 17.6569C6.73365 18.0474 7.36681 18.0474 7.75734 17.6569L15.9497 9.46447Z"
                                                           fill="#667085"/>
                                                 </svg>
-
-                                                <div style="font-size: 18px;">
-                                                    Other HCPs in account
-                                                </div>
-                                            </div>
-                                            <div style="display: flex; align-items: center; gap: 12px;">
-                                                <div class="round-box round-box--success">
-                                                    {{report_data_month}}
-                                                </div>
-                                                <a href="{{qlik_sense_url}}">
-                                                    <svg class="icon" width="24" height="24" viewBox="0 0 24 24"
-                                                         fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M15.9497 9.46447V15.5356C15.9497 16.0878 16.3975 16.5356 16.9497 16.5356C17.502 16.5356 17.9497 16.0878 17.9497 15.5356L17.9497 6.55027C17.9497 6.27413 17.7259 6.05027 17.4497 6.05027L16.9545 6.05027C16.9513 6.05026 16.9481 6.05026 16.9449 6.05027L8.46445 6.05027C7.91217 6.05027 7.46445 6.49799 7.46445 7.05027C7.46446 7.60256 7.91217 8.05027 8.46445 8.05027H14.5355L6.34313 16.2427C5.9526 16.6332 5.9526 17.2663 6.34313 17.6569C6.73365 18.0474 7.36681 18.0474 7.75734 17.6569L15.9497 9.46447Z"
-                                                              fill="#667085"/>
-                                                    </svg>
-
-                                                </a>
-                                            </div>
+                                            </a>
                                         </div>
                                     </div>
                                     <table class="table">
                                         <thead>
-                                        <tr>
-                                            <th>Name</th>
-                                            <th>Speciality</th>
-                                        </tr>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Speciality</th>
+                                            </tr>
                                         </thead>
                                         <tbody>
-                                        {% for other_hcp in other_hcps %}
-                                        <tr>
-                                            <td>{{other_hcp.name}}</td>
+                                            {% if other_hcps|length == 0 %}
+                                                <tr>
+                                                    <td colspan="3">
+                                                        No data available
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                            {% for other_hcp in other_hcps %}
+                                            <tr>
+                                                <td>{{ other_hcp.name }}</td>
 
-                                            <td class="color-secondary">
-                                                {{other_hcp.specialty}}
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
+                                                <td class="color-secondary">
+                                                    {{ other_hcp.specialty }}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
                                         </tbody>
                                     </table>
                                 </div>
-                                
-                                
+
                                 <div class="card no-split">
-    <div style="padding: 18px 20px;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <svg class="icon" width="20" height="20" viewBox="0 0 20 20" fill="none"
-                     xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" clip-rule="evenodd"
-                          d="M2.5 5C2.5 3.61929 3.61929 2.5 5 2.5H15C16.3807 2.5 17.5 3.61929 17.5 5V15C17.5 16.3807 16.3807 17.5 15 17.5H5C3.61929 17.5 2.5 16.3807 2.5 15V5ZM15 4.16667H13.125V6.875H15.8333V5C15.8333 4.53976 15.4602 4.16667 15 4.16667ZM11.4583 4.16667V6.875H8.54167V4.16667H11.4583ZM11.4583 8.54167H8.54167V11.4583H11.4583V8.54167ZM11.4583 13.125H8.54167V15.8333H11.4583V13.125ZM6.875 11.4583V8.54167H4.16667V11.4583H6.875ZM4.16667 13.125H6.875V15.8333H5C4.53976 15.8333 4.16667 15.4602 4.16667 15V13.125ZM15.8333 13.125V15C15.8333 15.4602 15.4602 15.8333 15 15.8333H13.125V13.125H15.8333ZM15.8333 11.4583H13.125V8.54167H15.8333V11.4583ZM6.875 4.16667V6.875H4.16667V5C4.16667 4.53976 4.53976 4.16667 5 4.16667H6.875Z"
-                          fill="#667085"/>
-                </svg>
-                <div style="font-size: 18px;">
-                    Previous Visits
-                </div>
-            </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div class="round-box round-box--success">
-                    {{report_data_month}}
-                </div>
-                <a href="{{qlik_sense_url}}">
-                    <svg class="icon" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                         xmlns="http://www.w3.org/2000/svg">
-                        <path
-                            d="M15.9497 9.46447V15.5356C15.9497 16.0878 16.3975 16.5356 16.9497 16.5356C17.502 16.5356 17.9497 16.0878 17.9497 15.5356L17.9497 6.55027C17.9497 6.27413 17.7259 6.05027 17.4497 6.05027L16.9545 6.05027C16.9513 6.05026 16.9481 6.05026 16.9449 6.05027L8.46445 6.05027C7.91217 6.05027 7.46445 6.49799 7.46445 7.05027C7.46446 7.60256 7.91217 8.05027 8.46445 8.05027H14.5355L6.34313 16.2427C5.9526 16.6332 5.9526 17.2663 6.34313 17.6569C6.73365 18.0474 7.36681 18.0474 7.75734 17.6569L15.9497 9.46447Z"
-                            fill="#667085"/>
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </div>
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Employee</th>
-            <th>Date</th>
-            <th>Email</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for visit in previous_visits %}
-        <tr>
-            <td>{{visit.employee_name}}</td>
-            <td class="color-secondary">{{visit.date.strftime('%Y-%m-%d')}}</td>
-            <td class="color-secondary">{{visit.employee_email}}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-                                
+                                    <div class="card__table-header-wrapper">
+                                        <div class="card__table-header">
+                                            <svg class="icon" width="20" height="20" viewBox="0 0 20 20"
+                                                 fill="none"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" clip-rule="evenodd"
+                                                      d="M2.5 5C2.5 3.61929 3.61929 2.5 5 2.5H15C16.3807 2.5 17.5 3.61929 17.5 5V15C17.5 16.3807 16.3807 17.5 15 17.5H5C3.61929 17.5 2.5 16.3807 2.5 15V5ZM15 4.16667H13.125V6.875H15.8333V5C15.8333 4.53976 15.4602 4.16667 15 4.16667ZM11.4583 4.16667V6.875H8.54167V4.16667H11.4583ZM11.4583 8.54167H8.54167V11.4583H11.4583V8.54167ZM11.4583 13.125H8.54167V15.8333H11.4583V13.125ZM6.875 11.4583V8.54167H4.16667V11.4583H6.875ZM4.16667 13.125H6.875V15.8333H5C4.53976 15.8333 4.16667 15.4602 4.16667 15V13.125ZM15.8333 13.125V15C15.8333 15.4602 15.4602 15.8333 15 15.8333H13.125V13.125H15.8333ZM15.8333 11.4583H13.125V8.54167H15.8333V11.4583ZM6.875 4.16667V6.875H4.16667V5C4.16667 4.53976 4.53976 4.16667 5 4.16667H6.875Z"
+                                                      fill="#667085"/>
+                                            </svg>
+                                            <div style="font-size: 18px;">
+                                                Previous Visits
+                                            </div>
+                                            <div class="round-box round-box--success">
+                                                {{ report_data_month }}
+                                            </div>
+                                            <a target="_blank" href="{{qlik_sense_url}}">
+                                                <svg class="icon" width="24" height="24" viewBox="0 0 24 24"
+                                                     fill="none"
+                                                     xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                            d="M15.9497 9.46447V15.5356C15.9497 16.0878 16.3975 16.5356 16.9497 16.5356C17.502 16.5356 17.9497 16.0878 17.9497 15.5356L17.9497 6.55027C17.9497 6.27413 17.7259 6.05027 17.4497 6.05027L16.9545 6.05027C16.9513 6.05026 16.9481 6.05026 16.9449 6.05027L8.46445 6.05027C7.91217 6.05027 7.46445 6.49799 7.46445 7.05027C7.46446 7.60256 7.91217 8.05027 8.46445 8.05027H14.5355L6.34313 16.2427C5.9526 16.6332 5.9526 17.2663 6.34313 17.6569C6.73365 18.0474 7.36681 18.0474 7.75734 17.6569L15.9497 9.46447Z"
+                                                            fill="#667085"/>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Employee</th>
+                                                <th>Date</th>
+                                                <th>Email</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% if previous_visits|length == 0 %}
+                                                <tr>
+                                                    <td colspan="3">
+                                                        No data available
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                            {% for visit in previous_visits %}
+                                            <tr>
+                                                <td>{{ visit.employee_name }}</td>
+                                                <td class="color-secondary">{{ visit.date }}
+                                                </td>
+                                                <td class="color-secondary">{{ visit.employee_email }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                            
-                        
-                        </div>
 
-                        <div style="margin-top: 10px;"></div>
-                    </main>
-                </td>
-            </tr>
+                            <div style="margin-top: 10px;"></div>
+                        </main>
+                    </td>
+                </tr>
             </tbody>
             <tfoot>
-            <tr>
-                <td>
-                    <div class="footer-space">&nbsp;</div>
-                </td>
-            </tr>
+                <tr>
+                    <td>
+                        <div class="footer-space">&nbsp;</div>
+                    </td>
+                </tr>
             </tfoot>
         </table>
     </div>
@@ -716,9 +827,18 @@ template = jinja2.Template(
         <p style="margin: 0 0 5px;">
             Report generation supported by GenAI (generated on {{current_date}})
         </p>
+        <small style="display: block; font-size: 12px; margin-top: 4px;">
+            See Risks and Limitations <a style="text-decoration: underline" target="_blank" href="https://collaboration.merck.com/sites/lemon/SitePages/GPTeal-Risks-%26-Limitations.aspx"><strong>here</strong></a>
+        </small>
+        <small style="display: block; font-size: 12px; margin-top: 4px;">
+            Submit your feedback and/or report any inaccuracies <a style="text-decoration: underline" target="_blank" href="https://forms.office.com/r/70hKAMf9ii"><strong>here</strong></a>
+        </small>
+        <small style="display: block; font-size: 12px; margin-top: 4px;">
+            <strong>Powered by ai.MATE</strong>
+        </small>
     </footer>
 </div>
 </body>
-</html>;
+</html>
     """
 )

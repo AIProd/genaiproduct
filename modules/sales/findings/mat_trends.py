@@ -2,9 +2,9 @@ from typing import Optional, List
 
 import pandas as pd
 
+from modules.global_utils import FindingResult
 from modules.sales import constants
 from modules.sales.findings.finding import Finding
-from modules.sales.utils import FindingResult
 
 
 class MATTrends(Finding):

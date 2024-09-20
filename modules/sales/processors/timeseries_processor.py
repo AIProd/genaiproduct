@@ -3,9 +3,9 @@ from abc import ABC
 import pandas as pd
 
 from modules.global_utils import ProcessorHelper
-from modules.interactions import constants
-from modules.interactions.processors.processor import Processor
-from modules.interactions.utils import _create_time_series
+from modules.sales import constants
+from modules.sales.processors.processor import Processor
+from modules.sales.utils import _create_time_series
 
 
 class TimeSeriesProcessor(Processor, ABC):

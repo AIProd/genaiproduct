@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any
 
 from generation.daily_report import template
+from generation.google_maps_url_generator import GoogleMapsURLGenerator
 from generation.qlikurlgenerator import QlikSenseURLGenerator
 
 
@@ -71,12 +72,16 @@ class VisitReportGenerator:
 
         return first_day_two_months_ago, month_name
 
-    def _get_previous_visits(self, hcp_uuid: str, account_uuid: str, exclude_employee_uuid: str) -> List[Dict[str, Any]]:
+    def _get_previous_visits(self, hcp_uuid: str, account_uuid: str) -> List[
+        Dict[str, Any]
+    ]:
         previous_visits = self.interaction_df[
             (self.interaction_df['hcp_uuid'] == hcp_uuid)
             & (self.interaction_df['account_uuid'] == account_uuid)
-            & (self.interaction_df['employee_uuid'] != exclude_employee_uuid)
         ]
+        previous_visits.loc[:, 'timestamp'] = pd.to_datetime(previous_visits['timestamp'])
+        today = pd.Timestamp.today().normalize()
+        previous_visits = previous_visits[previous_visits['timestamp'] < today]
 
         if previous_visits.empty:
             return []
@@ -84,12 +89,11 @@ class VisitReportGenerator:
         previous_visits_sorted = previous_visits.sort_values(by='timestamp', ascending=False)
 
         latest_visits = previous_visits_sorted.drop_duplicates(subset='employee_uuid', keep='first')
-
         visits = []
         for _, visit in latest_visits.iterrows():
             employee = self._find_row_as_dict(self.employees, visit['employee_uuid'])
             visits.append({
-                "date": visit['timestamp'],
+                "date": visit['timestamp'].strftime('%Y-%m-%d'),
                 "employee_name": employee['name'],
                 "employee_email": employee['email'],
             })
@@ -107,7 +111,7 @@ class VisitReportGenerator:
             report_date, report_month_name = self._get_previous_month_info()
 
             pd_timestamp = pd.to_datetime(visit['timestamp'])
-            formatted_date = pd_timestamp.strftime("%A, %d %B")
+            formatted_date = pd_timestamp.strftime("%A, %d %B %I:%M %p")
 
             try:
                 hcp_data = self._find_row_as_dict(self.hcps, hcp_uuid)
@@ -115,10 +119,10 @@ class VisitReportGenerator:
             except ValueError as e:
                 print(e)
                 continue
-            previous_visits = self._get_previous_visits(hcp_uuid, account_uuid, employee_uuid)
+            previous_visits = self._get_previous_visits(hcp_uuid, account_uuid)
 
-            account_id=account_data['id']
-            hcp_id=hcp_data['id']
+            account_id = str(account_data['id'])
+            hcp_id = str(hcp_data['id'])
             qlik_customer360_url = self.qlik_url_generator.generate_customer_360_insights_url()
             account_360_url = self.qlik_url_generator.generate_account_page_url(account_id)
             hcp_360_url = self.qlik_url_generator.generate_hcp_page_url(hcp_id)
@@ -127,16 +131,17 @@ class VisitReportGenerator:
                 "hcp_name": hcp_data['name'],
                 "planed_visit_date": formatted_date,
                 "account_name": account_data['name'],
+                "google_map_url": GoogleMapsURLGenerator.generate_url(
+                    account_name=str(account_data['name']),
+                    street=str(account_data['street']),
+                    city=str(account_data['city']),
+                    zip_code=str(account_data['zip'])
+                ),
+                "contact_address": f"{account_data['street']} · {account_data['zip']} {account_data['city']}",
                 # TODO: AIM-31 replace with correct value when becomes available
-                "google_map_url": "https://maps.app.goo.gl/g73xJUfpJwh2UtVQ6",
-                # TODO: AIM-31 replace with correct value when becomes available
-                "contact_address": "Schönenbergstrasse 6 · 8820 Wädenswil",
-                # TODO: AIM-31 replace with correct value when becomes available
-                "contact_phone": "+41 44 780 00 03",
-                # TODO: AIM-31 replace with correct value when becomes available
-                "contact_web": "kinderpraxis-waedi.ch",
+                "contact_phone": "N/A",
+                "contact_web": hcp_data['email'],
                 "findings": self._get_findings(employee_uuid, hcp_uuid, report_date),
-                # TODO: AIM-31 replace with correct value when becomes available
                 "report_data_month": report_month_name,
                 "sales": self._get_sales_metrics(employee_uuid, account_uuid, report_date),
                 "interactions": self._get_interaction_metrics(employee_uuid, account_uuid, report_date),
@@ -145,10 +150,11 @@ class VisitReportGenerator:
                 "insights": [],
                 "other_hcps": self._get_all_hcps_in_account(account_uuid, hcp_uuid),
                 "current_date": datetime.now().strftime("%d.%m.%Y"),
-                "qlik_customer360_url":qlik_customer360_url,
-                "account_360_url":account_360_url,
+                "qlik_customer360_url": qlik_customer360_url,
+                "account_360_url": account_360_url,
                 "hcp_360_url": hcp_360_url,
-                "previous_visits":previous_visits
+                "previous_visits": previous_visits,
+                "qlik_sense_url": account_360_url,
             }
 
             html_string = template.render(template_data)
@@ -176,8 +182,9 @@ class VisitReportGenerator:
             mat_change = round(product_df[product_df['indicator'] == 'mat_growth_change_previous_year']['value'].sum(),
                                2).astype(float)
             rolq = round(product_df[product_df['indicator'] == 'ROLQ']['value'].sum(), 2).astype(float)
-            rolq_change = round(product_df[product_df['indicator'] == 'rolling_quarter_change_previous_year']['value'].sum(),
-                2) .astype(float)
+            rolq_change = round(
+                product_df[product_df['indicator'] == 'rolling_quarter_change_previous_year']['value'].sum(),
+                2).astype(float)
 
             sales.append(
                 {
@@ -205,7 +212,7 @@ class VisitReportGenerator:
         for _, row in sales_finding_data.iterrows():
             trends.append({
                 "type": row['type'],
-                "text": f"{float(row['details']):.2f}" if isinstance(row['details'], (int, float)) else row['details']
+                "text": f"{row['product_name']}: {float(row['details']):.2f}" if isinstance(row['details'], (int, float)) else row['details']
             })
 
         return trends
@@ -226,7 +233,8 @@ class VisitReportGenerator:
             findings.append(
                 {
                     "type": row["type"],
-                    "text": f"{float(row['details']):.2f}" if isinstance(row['details'], (int, float)) else row['details']
+                    "text": f"{float(row['details']):.2f}" if isinstance(row['details'], (int, float)) else row[
+                        'details']
                 }
             )
 
@@ -235,7 +243,8 @@ class VisitReportGenerator:
     def _get_interaction_metrics(self, employee_uuid: str, account_uuid: str, report_date) -> List[Dict[str, Any]]:
         report_date_ts = pd.Timestamp(report_date)
 
-        self.interaction_df['timestamp'] = pd.to_datetime(self.interaction_df['timestamp'],errors="coerce").dt.tz_localize(None)
+        self.interaction_df['timestamp'] = pd.to_datetime(self.interaction_df['timestamp'],
+                                                          errors="coerce").dt.tz_localize(None)
         interactions_data = self.interaction_df[
             (self.interaction_df['employee_uuid'] == employee_uuid)
             & (self.interaction_df['account_uuid'] == account_uuid)
@@ -254,7 +263,6 @@ class VisitReportGenerator:
             mat = round(channel_df[channel_df['indicator'] == 'MAT']['value'].astype(float).sum())
             rolq = round(channel_df[channel_df['indicator'] == 'ROLQ']['value'].astype(float).sum())
             rolq_change = round(channel_df[channel_df['indicator'] == 'ROLQGrowthPY']['value'].astype(float).sum())
-
 
             interactions.append(
                 {

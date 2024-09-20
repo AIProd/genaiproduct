@@ -8,15 +8,20 @@ from modules.global_utils import ProcessorHelper
 from modules.interactions import constants
 from modules.interactions.processors.timeseries_processor import TimeSeriesProcessor
 
-class MonthlyProcessor(TimeSeriesProcessor):
+class AnnualProcessor(TimeSeriesProcessor):
 
     def process(self) -> Optional[pd.DataFrame]:
         df = self.processing_data_frame.sort_values(by='timestamp')
         output_df = pd.DataFrame()
 
+        df = df.groupby(constants.COMMON_GROUP_COLUMNS + ['year']).agg({
+            constants.COLUMN_TOTAL_ACTIONS: 'sum',
+            'timestamp': 'first'
+        }).reset_index()
+
         df.loc[:, constants.COLUMN_LAST_YEAR_TOTAL_ACTIONS] = df.groupby(
             constants.COMMON_GROUP_COLUMNS
-        )[constants.COLUMN_TOTAL_ACTIONS].shift(12)
+        )[constants.COLUMN_TOTAL_ACTIONS].shift(1)
 
         df.loc[:, constants.COLUMN_LAST_YEAR_TOTAL_ACTIONS] = (
             df[constants.COLUMN_LAST_YEAR_TOTAL_ACTIONS].fillna(0)
@@ -42,8 +47,8 @@ class MonthlyProcessor(TimeSeriesProcessor):
             metric_name=constants.METRIC_PERCENTAGE,
             metric_type=constants.METRIC_TYPE_INTERACTIONS,
             indicator=constants.INDICATOR_TOTAL_ACTIONS_CHANGE_PREVIOUS_YEAR,
-            period=global_constants.PERIOD_MONTH,
-            group_by=constants.COMMON_GROUP_COLUMNS + ['year', 'month'],
+            period=global_constants.PERIOD_YEAR,
+            group_by=constants.COMMON_GROUP_COLUMNS + ['year'],
             new_df=output_df
         )
 
@@ -53,8 +58,8 @@ class MonthlyProcessor(TimeSeriesProcessor):
             metric_name=constants.METRIC_INTERACTIONS,
             metric_type=constants.METRIC_TYPE_INTERACTIONS,
             indicator=constants.INDICATOR_TOTAL_ACTIONS,
-            period=global_constants.PERIOD_MONTH,
-            group_by=constants.COMMON_GROUP_COLUMNS + ['year', 'month'],
+            period=global_constants.PERIOD_YEAR,
+            group_by=constants.COMMON_GROUP_COLUMNS + ['year'],
             new_df=output_df
         )
 

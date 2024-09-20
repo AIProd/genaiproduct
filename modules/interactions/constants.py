@@ -1,10 +1,5 @@
-HCP_COLUMN = 'hcp'
-EMPLOYEE_NAME_COLUMN = 'employee_name'
-EMPLOYEE_EMAIL_COLUMN = 'emp_email'
-CALL_DATETIME_COLUMN = 'call_datetime'
-PLANNED_CALL_FLAG_COLUMN = 'planned_call_flag'
-PERIOD_DAILY = 'daily'
-TIME_FORMAT = '%Y-%m-%d'
+# Constants
+
 COMMON_GROUP_COLUMNS = [
     'employee_uuid',
     'account_uuid',
@@ -16,20 +11,49 @@ COMMON_GROUP_COLUMNS = [
     'source',
 ]
 
-INDICATOR_SUBJECT = 'subject'
+COLUMN_TOTAL_ACTIONS = 'total_actions'
+COLUMN_TIMESTAMP = 'timestamp'
 
-TYPE_INTERACTIONS = 'interactions'
+COLUMN_LAST_YEAR_TOTAL_ACTIONS = 'total_actions_last_year'
+
+PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR = 'total_actions_change_last_year'
+
+MOVING_ANNUAL_TOTAL_COLUMN_TOTAL_ACTIONS = 'total_actions_moving_annual_total'
+
+MOVING_ANNUAL_TOTAL_COLUMN_LAST_YEAR_TOTAL_ACTIONS = 'total_actions_moving_annual_total_last_year'
+
+PERCENTAGE_MOVING_ANNUAL_TOTAL_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR = 'moving_annual_total_total_actions_change_last_year'
+
+ROLLING_QUARTER_COLUMN_TOTAL_ACTIONS = 'total_actions_rolling_quarter'
+
+ROLLING_QUARTER_COLUMN_LAST_YEAR_TOTAL_ACTIONS = 'total_actions_rolling_quarter_last_year'
+
+PERCENTAGE_ROLLING_QUARTER_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR = 'rolling_quarter_total_actions_change_last_year'
+
+METRIC_PERCENTAGE = '%'
+METRIC_INTERACTIONS = 'interactions'
+
+METRIC_TYPE_INTERACTIONS = 'interactions'
+
 METRIC_ROLQ_CHANGE = 'rolling_quarter_change'
 METRIC_MOVING_ANNUAL_TOTAL = 'moving_annual_total'
 METRIC_ROLLING_QUARTER = 'rolling_quarter'
-METRIC_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR = 'rolling_quarter_change_previous_year'
-METRIC_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR = 'mat_growth_change_previous_year'
-METRIC_INTERACTIONS_CHANGE_PREVIOUS_YEAR = 'interactions_change_previous_year'
 METRIC_COUNT = 'count'
+METRIC_DATE = 'date'
+METRIC_DAYS = 'days'
 PERCENTAGE_METRIC = 'percentage'
 CURRENCY_METRIC = 'CHF'
 UNIT_METRIC = 'units'
 DATE_METRIC = 'date'
+
+INDICATOR_TOTAL_ACTIONS = 'total_actions'
+INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR = 'rolling_quarter_change_previous_year'
+INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR = 'mat_growth_change_previous_year'
+INDICATOR_ROLLING_QUARTER = 'ROLQ'
+INDICATOR_MOVING_ANNUAL_TOTAL = 'MAT'
+INDICATOR_TOTAL_ACTIONS_CHANGE_PREVIOUS_YEAR = 'total_actions_change_previous_year'
+INDICATOR_NEXT_CALL = 'next_call_date'
+INDICATOR_MARKETING_EMAIL = 'marketing_email'
 
 PERIOD_MONTH = 'month'
 PERIOD_YEAR = 'year'

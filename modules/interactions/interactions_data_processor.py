@@ -3,7 +3,8 @@ import pandas as pd
 from modules.interactions.processors.email_interaction_processor import EmailInteractionProcessor
 from modules.interactions.processors.mat_processor import MATProcessor
 from modules.interactions.processors.monthly_processor import MonthlyProcessor
-from modules.interactions.processors.next_calls import NextCallsProcessor
+from modules.interactions.processors.annual_processor import AnnualProcessor
+from modules.interactions.processors.next_calls_processor import NextCallsProcessor
 from modules.interactions.processors.percentage_processor import PercentageProcessor
 from modules.interactions.processors.rolq_processor import ROLQProcessor
 
@@ -24,6 +25,7 @@ class InteractionDataProcessor:
 
         self.processors = [
             MonthlyProcessor.__name__,
+            AnnualProcessor.__name__,
             NextCallsProcessor.__name__,
             MATProcessor.__name__,
             ROLQProcessor.__name__,
@@ -33,7 +35,7 @@ class InteractionDataProcessor:
 
         self.output_data_frame = pd.DataFrame()
 
-    def calculate_interaction_metrics(self):
+    def process_data(self):
         """
         Calculate interaction metrics.
         """
@@ -41,6 +43,8 @@ class InteractionDataProcessor:
             processor_object = globals()[processor](self.input_data_frame)
             self.output_data_frame = pd.concat([self.output_data_frame, processor_object.process()], ignore_index=True)
             del processor_object
+
+        self.output_data_frame['timestamp'] = self.output_data_frame['timestamp'].apply(lambda x: x.isoformat())
 
     def get_processed_data(self) -> pd.DataFrame:
         """
@@ -51,4 +55,5 @@ class InteractionDataProcessor:
         """
         # Drop year and month from the final output
         self.output_data_frame = self.output_data_frame.drop(columns=['year', 'month'])
+
         return self.output_data_frame
