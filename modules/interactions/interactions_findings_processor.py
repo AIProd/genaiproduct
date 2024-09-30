@@ -1,6 +1,7 @@
 import pandas as pd
 
 from modules.interactions.findings.email_finding import EmailFinding
+from modules.interactions.findings.high_priority_engagement_finding import HighPriorityEngagementFinding
 
 
 class InteractionsFindingsProcessor:
@@ -13,6 +14,7 @@ class InteractionsFindingsProcessor:
                 'columns': ['account_uuid', 'hcp_uuid', 'employee_uuid'],
                 'generators': [
                     EmailFinding(),
+                    HighPriorityEngagementFinding()
                 ],
             },
         ]

@@ -53,6 +53,7 @@ INDICATOR_ROLLING_QUARTER = 'ROLQ'
 INDICATOR_MOVING_ANNUAL_TOTAL = 'MAT'
 INDICATOR_TOTAL_ACTIONS_CHANGE_PREVIOUS_YEAR = 'total_actions_change_previous_year'
 INDICATOR_NEXT_CALL = 'next_call_date'
+INDICATOR_CALL = 'call_date'
 INDICATOR_MARKETING_EMAIL = 'marketing_email'
 
 PERIOD_MONTH = 'month'
@@ -80,11 +81,12 @@ COLUMN_MAPPING = {
             'order_category': 'category',
             'cases_date': 'timestamp',
             'int_title': 'subject',
+            'ter_target':'ter_target',
         }
 
 EMAIL_CHANNELS = ['AE - Veeva', 'SFMC Marketing Email']
 
 PERCENTAGE_METRICS = ['rejection', 'acceptation', 'reaction']
 
-
+FINDING_TYPE_HIGH_PRIORITY_ENGAGEMENT="high_priority_engagement"
 FINDING_TYPE_EMAIL_FINDINGS = 'email_summary'

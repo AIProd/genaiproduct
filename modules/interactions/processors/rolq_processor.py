@@ -65,7 +65,7 @@ class ROLQProcessor(TimeSeriesProcessor):
             metric=constants.PERCENTAGE_ROLLING_QUARTER_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR,
             metric_name=constants.METRIC_PERCENTAGE,
             metric_type=constants.METRIC_TYPE_INTERACTIONS,
-            indicator=constants.INDICATOR_ROLLING_QUARTER,
+            indicator=constants.INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR,
             period=global_constants.PERIOD_MONTH,
             group_by=constants.COMMON_GROUP_COLUMNS + ['year', 'month'],
             new_df=output_df

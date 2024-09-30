@@ -12,8 +12,9 @@ class HCP:
     email: str
     specialty: str
     franchise: str
-
+    ter_target: str
     account_uuid: Optional[str] = None
+
     uuid: str = field(default_factory=lambda: str(uuid4()))
 
     @classmethod
@@ -23,7 +24,8 @@ class HCP:
             name=data['name'],
             email=data['email'],
             specialty=data['specialty'],
-            franchise=data['franchise']
+            franchise=data['franchise'],
+            ter_target=data['ter_target']
         )
         if 'uuid' in data:
             hcp.uuid = data['uuid']

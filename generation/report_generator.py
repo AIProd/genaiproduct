@@ -2,22 +2,16 @@ import calendar
 from itertools import chain
 
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Dict, List, Any
 
-from generation.daily_report import template
+from generation import constants
+from generation.templates import daily_report, daily_email
 from generation.google_maps_url_generator import GoogleMapsURLGenerator
 from generation.qlikurlgenerator import QlikSenseURLGenerator
 
 
 class VisitReportGenerator:
-    IMPORTANT_SALES_METRICS = [
-        'MATGrowthPY', 'ROLQGrowthPY', 'moving_annual_total',
-        'rolling_quarterly', 'sales', 'units'
-    ]
-    INTERACTION_CHANNEL = 'CALLS - Veeva'
-    IMPORTANT_INTERACTION_METRICS = ['total_actions_counts', 'MonthGrowthPY']
-
     def __init__(
             self,
             planned_visits_df: pd.DataFrame,
@@ -38,10 +32,13 @@ class VisitReportGenerator:
         """
         self.planned_visits_df = planned_visits_df
 
-        self.sales_df = sales_df
-        self.sales_findings = sales_findings
+        # TODO: Quickfix address later
+        self.filtered_hcps_uuids = hcps_df[hcps_df['franchise'] == constants.FRANCHISE_VACC]['uuid'].unique()
 
-        self.interaction_df = interaction_df
+        self.sales_df = sales_df[sales_df['hcp_uuid'].isin(self.filtered_hcps_uuids)]
+        self.sales_findings = sales_findings[sales_findings['hcp_uuid'].isin(self.filtered_hcps_uuids)]
+
+        self.interaction_df = interaction_df[interaction_df['hcp_uuid'].isin(self.filtered_hcps_uuids)]
         self.consent_findings = consent_findings
 
         self.hcps = hcps_df
@@ -66,11 +63,9 @@ class VisitReportGenerator:
         first_day_current_month = current_date.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         last_day_previous_month = first_day_current_month - timedelta(days=1)
         first_day_previous_month = last_day_previous_month.replace(day=1)
-        first_day_two_months_ago = first_day_previous_month - timedelta(days=1)
-        first_day_two_months_ago = first_day_two_months_ago.replace(day=1)
         month_name = calendar.month_name[first_day_previous_month.month]
 
-        return first_day_two_months_ago, month_name
+        return first_day_previous_month, month_name
 
     def _get_previous_visits(self, hcp_uuid: str, account_uuid: str) -> List[
         Dict[str, Any]
@@ -78,7 +73,9 @@ class VisitReportGenerator:
         previous_visits = self.interaction_df[
             (self.interaction_df['hcp_uuid'] == hcp_uuid)
             & (self.interaction_df['account_uuid'] == account_uuid)
+            & (self.interaction_df['indicator'] == constants.INDICATOR_CALL)
         ]
+
         previous_visits.loc[:, 'timestamp'] = pd.to_datetime(previous_visits['timestamp'])
         today = pd.Timestamp.today().normalize()
         previous_visits = previous_visits[previous_visits['timestamp'] < today]
@@ -93,16 +90,16 @@ class VisitReportGenerator:
         for _, visit in latest_visits.iterrows():
             employee = self._find_row_as_dict(self.employees, visit['employee_uuid'])
             visits.append({
-                "date": visit['timestamp'].strftime('%Y-%m-%d'),
+                "date": visit['timestamp'].strftime(constants.DISPLAY_DATE_TIME_FORMAT_LONG),
                 "employee_name": employee['name'],
                 "employee_email": employee['email'],
             })
 
         return visits
 
-    def generate_report_for_employee(self, employee_uuid: str) -> list[Any]:
+    def generate_report_data_for_employee(self, employee_uuid: str) -> list[Any]:
         employee_visits = self.planned_visits_df[self.planned_visits_df['employee_uuid'] == employee_uuid]
-        html_reports = []
+        data = []
 
         for _, visit in employee_visits.iterrows():
             hcp_uuid = visit['hcp_uuid']
@@ -111,17 +108,20 @@ class VisitReportGenerator:
             report_date, report_month_name = self._get_previous_month_info()
 
             pd_timestamp = pd.to_datetime(visit['timestamp'])
-            formatted_date = pd_timestamp.strftime("%A, %d %B %I:%M %p")
+            formatted_date = pd_timestamp.strftime(constants.DISPLAY_DATE_TIME_FORMAT_LONG)
 
             try:
                 hcp_data = self._find_row_as_dict(self.hcps, hcp_uuid)
                 account_data = self._find_row_as_dict(self.accounts, account_uuid)
+
             except ValueError as e:
                 print(e)
                 continue
             previous_visits = self._get_previous_visits(hcp_uuid, account_uuid)
 
-            account_id = str(account_data['id'])
+            account_id = str(int(account_data['id']))
+
+            ter_target = hcp_data['ter_target']
             hcp_id = str(hcp_data['id'])
             qlik_customer360_url = self.qlik_url_generator.generate_customer_360_insights_url()
             account_360_url = self.qlik_url_generator.generate_account_page_url(account_id)
@@ -149,17 +149,25 @@ class VisitReportGenerator:
                 # TODO: AIM-31 replace with correct value when becomes available
                 "insights": [],
                 "other_hcps": self._get_all_hcps_in_account(account_uuid, hcp_uuid),
-                "current_date": datetime.now().strftime("%d.%m.%Y"),
+                "current_date": datetime.now().strftime(constants.DISPLAY_DATE_TIME_FORMAT_SHORT),
                 "qlik_customer360_url": qlik_customer360_url,
                 "account_360_url": account_360_url,
                 "hcp_360_url": hcp_360_url,
                 "previous_visits": previous_visits,
                 "qlik_sense_url": account_360_url,
+                'ter_target':ter_target
             }
 
-            html_string = template.render(template_data)
+            data.append(template_data)
 
-            html_reports.append({"hcp": hcp_data['name'], "html": html_string})
+        return data
+
+    def generate_report_for_employee(self, employee_uuid: str) -> list[Any]:
+        data = self.generate_report_data_for_employee(employee_uuid)
+        html_reports = []
+        for template_data in data:
+            html_string = daily_report.render(template_data)
+            html_reports.append({"hcp": template_data['hcp_name'], "html": html_string})
 
         return html_reports
 
@@ -175,26 +183,53 @@ class VisitReportGenerator:
         unique_products = sales_data['product_name'].unique()
 
         sales = []
+
         for product in unique_products:
             product_df = sales_data[sales_data['product_name'] == product]
 
-            mat = round(product_df[product_df['indicator'] == 'MAT']['value'].sum(), 2).astype(float)
-            mat_change = round(product_df[product_df['indicator'] == 'mat_growth_change_previous_year']['value'].sum(),
-                               2).astype(float)
-            rolq = round(product_df[product_df['indicator'] == 'ROLQ']['value'].sum(), 2).astype(float)
+            mat = round(
+                product_df[product_df['indicator'] == constants.INDICATOR_MOVING_ANNUAL_TOTAL]['value'].sum(),
+                2
+            ).astype(float)
+
+            mat_change = round(
+                product_df[
+                    product_df['indicator'] == constants.INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR
+                ]['value'].sum(),
+                2
+            ).astype(float)
+
+            rolq = round(
+                product_df[
+                    product_df['indicator'] == constants.INDICATOR_ROLLING_QUARTER]['value'].sum(),
+                2,
+            ).astype(float)
             rolq_change = round(
-                product_df[product_df['indicator'] == 'rolling_quarter_change_previous_year']['value'].sum(),
-                2).astype(float)
+                product_df[
+                    product_df['indicator'] == constants.INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR
+                ]['value'].sum(),
+                2,
+            ).astype(float)
+            product_priority = product_df['product_priority'].iloc[
+                0] if 'product_priority' in product_df.columns else 'Not Available'
+
+            if pd.isna(product_priority) or product_priority in ['', 0, None]:
+                product_priority = 'Not Available'
+
+            product_name_with_priority = f"{product} ({product_priority})"
 
             sales.append(
                 {
-                    "product_name": product,
+                    "product_name": product_name_with_priority,
                     "mat": mat,
                     "mat_change": mat_change,
                     "rolq": rolq,
                     "rolq_change": rolq_change,
+                    "product_priority":product_priority
                 }
             )
+
+            sales.sort(key=lambda x: x['product_priority'])
 
         return sales
 
@@ -205,14 +240,15 @@ class VisitReportGenerator:
             (self.sales_findings['employee_uuid'] == employee_uuid)
             & (self.sales_findings['hcp_uuid'] == hcp_uuid)
             & (self.sales_findings['timestamp'] >= report_date_ts)
-            & (self.sales_findings['type'] == 'trends')
-            ]
+            & (self.sales_findings['type'] == constants.FINDING_TYPE_TRENDS)
+        ]
 
         trends = []
         for _, row in sales_finding_data.iterrows():
             trends.append({
                 "type": row['type'],
-                "text": f"{row['product_name']}: {float(row['details']):.2f}" if isinstance(row['details'], (int, float)) else row['details']
+                "text": f"{row['product_name']}: {float(row['details']):.2f}" if isinstance(row['details'], (
+                int, float)) else f"{row['product_name']}: {row['details']}"
             })
 
         return trends
@@ -225,8 +261,8 @@ class VisitReportGenerator:
             (self.sales_findings['employee_uuid'] == employee_uuid)
             & (self.sales_findings['hcp_uuid'] == hcp_uuid)
             & (self.sales_findings['timestamp'] >= report_date_ts)
-            & (self.sales_findings['type'] != 'trends')
-            ]
+            & (self.sales_findings['type'] != constants.FINDING_TYPE_TRENDS)
+        ]
 
         findings = []
         for _, row in sales_finding_data.iterrows():
@@ -258,11 +294,30 @@ class VisitReportGenerator:
         for channel in unique_channels:
             channel_df = interactions_data[interactions_data['channel'] == channel]
 
-            mat_change = round(channel_df[channel_df['indicator'] == 'MATGrowthPY']['value'].astype(float).sum())
+            mat = round(
+                channel_df[channel_df['indicator'] == constants.INDICATOR_MOVING_ANNUAL_TOTAL]['value'].apply(lambda x: float(x) if isinstance(x, str) else x).sum(),
+                2
+            )
 
-            mat = round(channel_df[channel_df['indicator'] == 'MAT']['value'].astype(float).sum())
-            rolq = round(channel_df[channel_df['indicator'] == 'ROLQ']['value'].astype(float).sum())
-            rolq_change = round(channel_df[channel_df['indicator'] == 'ROLQGrowthPY']['value'].astype(float).sum())
+            mat_change = round(
+                channel_df[
+                    channel_df['indicator'] == constants.INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR
+                    ]['value'].apply(lambda x: float(x) if isinstance(x, str) else x).sum(),
+                2
+            )
+
+            rolq = round(
+                channel_df[
+                    channel_df['indicator'] == constants.INDICATOR_ROLLING_QUARTER]['value'].
+                    apply(lambda x: float(x) if isinstance(x, str) else x).sum(),
+                2,
+            )
+            rolq_change = round(
+                channel_df[
+                    channel_df['indicator'] == constants.INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR
+                    ]['value'].apply(lambda x: float(x) if isinstance(x, str) else x).sum(),
+                2,
+            )
 
             interactions.append(
                 {
@@ -280,13 +335,47 @@ class VisitReportGenerator:
         hcps = self.hcps[
             (self.hcps['account_uuid'] == account_uuid)
             & (self.hcps['uuid'] != hcp_uuid)
-            & (self.hcps['franchise'] == 'CH_VACC_A_001')
-            ]
+            & (self.hcps['franchise'] == constants.FRANCHISE_VACC)
+        ]
 
         return [
             {"name": row['name'], "specialty": row['specialty']}
             for _, row in hcps.iterrows()
         ]
+
+    def generate_email_html_body(self, employee_uuid: str) -> str:
+        employee_visits = self.planned_visits_df[self.planned_visits_df['employee_uuid'] == employee_uuid]
+        employee_data = self._find_row_as_dict(self.employees, employee_uuid)
+
+        report_date, report_month_name = self._get_previous_month_info()
+
+        visits = []
+        for _, visit in employee_visits.iterrows():
+            hcp_uuid = visit['hcp_uuid']
+            account_uuid = visit['account_uuid']
+
+            try:
+                hcp_data = self._find_row_as_dict(self.hcps, hcp_uuid)
+                account_data = self._find_row_as_dict(self.accounts, account_uuid)
+            except ValueError as e:
+                print(e)
+                continue
+            pd_timestamp = pd.Timestamp(visit['timestamp'])
+
+            visits.append({
+                "hcp_name": hcp_data['name'],
+                "meeting_date_time": pd_timestamp.strftime("%A, %d %B %I:%M %p"),
+                "address": f"{account_data['street']}, {account_data['city']}, {account_data['zip']}",
+                "number_of_key_points": len(self._get_findings(employee_uuid, hcp_uuid, report_date))
+            })
+
+        template_data = {
+            "employee_name": employee_data['name'],
+            "report_date": date.today() + timedelta(days=1),
+            "planned_visits": visits
+        }
+
+        return daily_email.render(template_data)
 
     def generate_reports_for_all_employees(self) -> List[Any]:
         unique_employees = self.planned_visits_df['employee_uuid'].unique()

@@ -1,5 +1,6 @@
 import pandas as pd
 
+from modules.interactions.processors.call_processor import CallProcessor
 from modules.interactions.processors.email_interaction_processor import EmailInteractionProcessor
 from modules.interactions.processors.mat_processor import MATProcessor
 from modules.interactions.processors.monthly_processor import MonthlyProcessor
@@ -27,6 +28,7 @@ class InteractionDataProcessor:
             MonthlyProcessor.__name__,
             AnnualProcessor.__name__,
             NextCallsProcessor.__name__,
+            CallProcessor.__name__,
             MATProcessor.__name__,
             ROLQProcessor.__name__,
             PercentageProcessor.__name__,

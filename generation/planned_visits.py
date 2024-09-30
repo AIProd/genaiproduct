@@ -1,7 +1,9 @@
 import pandas as pd
 from datetime import datetime
 
-from generation.constants import BUSINESS_DAYS_COUNT, PERIOD_DAILY
+from dateutil.relativedelta import relativedelta
+
+from generation.constants import BUSINESS_DAYS_COUNT, PERIOD_DAILY, INDICATOR_NEXT_CALL
 
 
 class PlannedVisitsProcessor:
@@ -19,12 +21,12 @@ class PlannedVisitsProcessor:
     def _prepare_data_frame(self) -> None:
         columns = ['hcp_uuid', 'employee_uuid', 'account_uuid', 'timestamp']
         self.processing_data_frame = self.input_data_frame[
-            (self.input_data_frame['indicator'] == 'call_date')
+            (self.input_data_frame['indicator'] == INDICATOR_NEXT_CALL)
         ][columns]
 
     def _filter_for_upcoming_visits(self) -> None:
-        now = datetime.now()
-        business_days = pd.date_range(start=now, periods=BUSINESS_DAYS_COUNT, freq='B')
+        tomorrow = datetime.now() + relativedelta(days=1)
+        business_days = pd.date_range(start=tomorrow, periods=BUSINESS_DAYS_COUNT, freq='B')
         self.output_data_frame = self.processing_data_frame[
             pd.to_datetime(self.processing_data_frame['timestamp']).dt.date.isin(business_days.date)
         ]
