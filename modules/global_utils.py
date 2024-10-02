@@ -16,8 +16,10 @@ def get_llm() -> AzureChatOpenAI:
         openai_api_version=os.getenv("GP_TEAL_API_VERSION"),
         openai_api_key=os.getenv("GP_TEAL_API_KEY"),
         azure_deployment=os.getenv("GP_TEAL_DEPLOYMENT"),
+        temperature=0,
         max_retries=1,
     )
+
 
 def _safe_eval(value: str) -> List[str]:
     try:

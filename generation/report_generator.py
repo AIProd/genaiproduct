@@ -9,6 +9,8 @@ from generation import constants
 from generation.templates import daily_report, daily_email
 from generation.google_maps_url_generator import GoogleMapsURLGenerator
 from generation.qlikurlgenerator import QlikSenseURLGenerator
+from generation.gpt_insights import GPTInsightsGenerator
+
 
 
 class VisitReportGenerator:
@@ -45,6 +47,7 @@ class VisitReportGenerator:
         self.accounts = accounts_df
         self.employees = employees_df
         self.qlik_url_generator = QlikSenseURLGenerator()
+        self.gpt_generator = GPTInsightsGenerator()
 
     @staticmethod
     def _find_row_as_dict(df, uuid_value):
@@ -97,6 +100,46 @@ class VisitReportGenerator:
 
         return visits
 
+
+
+    def _create_grouped_sales_findings(self, hcp_uuid: str, employee_uuid: str):
+
+        filtered_sales_findings = self.sales_findings[
+            (self.sales_findings['hcp_uuid'] == hcp_uuid) &
+            (self.sales_findings['employee_uuid'] == employee_uuid)
+            ]
+        if filtered_sales_findings.empty:
+            return pd.DataFrame()
+
+        merged_findings = filtered_sales_findings.merge(
+            self.hcps[['uuid', 'name']], left_on='hcp_uuid', right_on='uuid', how='left'
+        ).rename(columns={'name': 'hcp_name'}).drop(columns=['uuid'])
+
+        merged_findings = merged_findings.merge(
+            self.accounts[['uuid', 'name']], left_on='account_uuid', right_on='uuid', how='left'
+        ).rename(columns={'name': 'account_name'}).drop(columns=['uuid'])
+
+        merged_findings = merged_findings.merge(
+            self.employees[['uuid', 'name']], left_on='employee_uuid', right_on='uuid', how='left'
+        ).rename(columns={'name': 'employee_name'}).drop(columns=['uuid'])
+
+
+        grouped_findings_combined = merged_findings.groupby(
+            ['hcp_name', 'account_name', 'employee_name']
+        ).agg(
+            finding=('type', lambda types: '; '.join(
+                [f"{t} with details: {details} and product: {product}"
+                 for t, details, product in zip(types, merged_findings.loc[types.index, 'details'],
+                                                merged_findings.loc[types.index, 'product_name'])]
+            ))
+        ).reset_index()
+
+        grouped_findings_combined = grouped_findings_combined[
+            ['hcp_name', 'account_name', 'employee_name', 'finding']
+        ]
+
+        return grouped_findings_combined
+
     def generate_report_data_for_employee(self, employee_uuid: str) -> list[Any]:
         employee_visits = self.planned_visits_df[self.planned_visits_df['employee_uuid'] == employee_uuid]
         data = []
@@ -104,6 +147,8 @@ class VisitReportGenerator:
         for _, visit in employee_visits.iterrows():
             hcp_uuid = visit['hcp_uuid']
             account_uuid = visit['account_uuid']
+
+            grouped_sales_findings = self._create_grouped_sales_findings(hcp_uuid, employee_uuid)
 
             report_date, report_month_name = self._get_previous_month_info()
 
@@ -147,7 +192,7 @@ class VisitReportGenerator:
                 "interactions": self._get_interaction_metrics(employee_uuid, account_uuid, report_date),
                 "trends": self._get_trends(employee_uuid, hcp_uuid, report_date),
                 # TODO: AIM-31 replace with correct value when becomes available
-                "insights": [],
+                "insights": self.gpt_generator.generate_insights_for_findings(grouped_sales_findings),
                 "other_hcps": self._get_all_hcps_in_account(account_uuid, hcp_uuid),
                 "current_date": datetime.now().strftime(constants.DISPLAY_DATE_TIME_FORMAT_SHORT),
                 "qlik_customer360_url": qlik_customer360_url,

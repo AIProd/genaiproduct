@@ -363,12 +363,12 @@ main {
                                         </svg>
 
                                     </div>
-                                    
+
                                     <div>
                                         <div style="margin-bottom: 4px; font-size: 16px; line-height: 24px;">
                                             Address
                                         </div>
-                                        
+
                                         <div class="color-secondary">
                                             {{ contact_address }}
                                             <br>
@@ -730,7 +730,7 @@ main {
                                             Insights
                                         </div>
                                         <p class="color-secondary">
-                                            Insights are now being tested and evaluated
+                                            {{insights}}
                                         </p>
                                     </div>
                                 </div>
@@ -857,7 +857,6 @@ main {
 </html>
     """
 )
-
 
 daily_email = jinja2.Template("""
 <!DOCTYPE html>
