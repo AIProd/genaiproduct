@@ -1,7 +1,8 @@
 from typing import Optional
 
-import pandas as pd
+import polars as pl
 
+from modules import global_constants
 from modules.global_utils import ProcessorHelper
 from modules.interactions import constants
 from modules.interactions.processors.timeseries_processor import TimeSeriesProcessor
@@ -9,37 +10,41 @@ from modules.interactions.processors.timeseries_processor import TimeSeriesProce
 
 class PercentageProcessor(TimeSeriesProcessor):
 
-    def process(self) -> Optional[pd.DataFrame]:
-        df = self.processing_data_frame
+    def process(self) -> Optional[pl.LazyFrame]:
+        lazy_frame = self.processing_lazy_frame.sort(constants.COLUMN_TIMESTAMP)
 
-        output_df = pd.DataFrame()
+        lazy_frame = lazy_frame.group_by_dynamic(
+            constants.COLUMN_TIMESTAMP,
+            every='1mo',
+            group_by=constants.COMMON_GROUP_COLUMNS,
+        ).agg(
+            ((pl.col(constants.COLUMN_REACTION).sum() / pl.count()) * 100).alias(constants.PERCENTAGE_COLUMN_REACTION),
+            ((pl.col(constants.COLUMN_ACCEPTATION).sum() / pl.count()) * 100).alias(constants.PERCENTAGE_COLUMN_ACCEPTATION),
+            ((pl.col(constants.COLUMN_REJECTION).sum() / pl.count()) * 100).alias(constants.PERCENTAGE_COLUMN_REJECTION),
+        )
 
-        for metric in constants.PERCENTAGE_METRICS:
-            for period in [constants.PERIOD_MONTH, constants.PERIOD_YEAR]:
-                group_columns = constants.COMMON_GROUP_COLUMNS + [
-                    'year',
-                    'month'
-                ] if period == constants.PERIOD_MONTH else constants.COMMON_GROUP_COLUMNS + [
-                    'year'
-                ]
-                percentage_df = df.groupby(group_columns).apply(
-                    lambda x: ProcessorHelper.calculate_percentages(x, metric)).reset_index()
-                percentage_df.columns = group_columns + [f'{metric}_percentage']
-                percentage_df['period'] = period
-                if period == constants.PERIOD_MONTH:
-                    percentage_df['timestamp'] = pd.to_datetime(percentage_df[['year', 'month']].assign(day=1),
-                                                                errors='coerce')
-                else:
-                    percentage_df['timestamp'] = pd.to_datetime(percentage_df['year'].astype(str) + '-01-01',
-                                                                errors='coerce')
-
-                percentage_df = percentage_df.dropna(subset=['timestamp'])
-
-                percentage_df['indicator'] = f'{metric}_percentage'
-                percentage_df['type'] = constants.METRIC_TYPE_INTERACTIONS
-                percentage_df = percentage_df.rename(columns={f'{metric}_percentage': 'value'})
-                percentage_df['metrics'] = constants.METRIC_PERCENTAGE
-
-                output_df = pd.concat([output_df, percentage_df], ignore_index=True)
-
-        return output_df
+        return ProcessorHelper.melt_lazy_frame(
+            lazy_frame,
+            [
+                constants.PERCENTAGE_COLUMN_REACTION,
+                constants.PERCENTAGE_COLUMN_ACCEPTATION,
+                constants.PERCENTAGE_COLUMN_REJECTION,
+            ],
+            constants.COMMON_GROUP_COLUMNS,
+            {
+                constants.PERCENTAGE_COLUMN_REACTION: constants.INDICATOR_REACTION_PERCENTAGE,
+                constants.PERCENTAGE_COLUMN_ACCEPTATION: constants.INDICATOR_ACCEPTATION_PERCENTAGE,
+                constants.PERCENTAGE_COLUMN_REJECTION: constants.INDICATOR_REJECTION_PERCENTAGE,
+            },
+            {
+                constants.PERCENTAGE_COLUMN_REACTION: constants.METRIC_PERCENTAGE,
+                constants.PERCENTAGE_COLUMN_ACCEPTATION: constants.METRIC_PERCENTAGE,
+                constants.PERCENTAGE_COLUMN_REJECTION: constants.METRIC_PERCENTAGE,
+            },
+            {
+                constants.PERCENTAGE_COLUMN_REACTION: global_constants.PERIOD_MONTH,
+                constants.PERCENTAGE_COLUMN_ACCEPTATION: global_constants.PERIOD_MONTH,
+                constants.PERCENTAGE_COLUMN_REJECTION: global_constants.PERIOD_MONTH,
+            },
+            constants.METRIC_TYPE_INTERACTIONS
+        )

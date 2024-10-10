@@ -1,4 +1,4 @@
-import pandas as pd
+import polars as pl
 
 from modules import global_constants
 from modules.global_utils import ProcessorHelper
@@ -7,28 +7,38 @@ from modules.interactions.processors.processor import Processor
 
 
 class NextCallsProcessor(Processor):
-    def _prepare_data_frame(self, data_frame: pd.DataFrame) -> pd.DataFrame:
-        data_frame = data_frame[
-            (data_frame['int_channel'] == 'CALLS - Veeva') &
-            (data_frame['int_type'] == 'In Person') &
-            (data_frame['int_acceptation'] == 1) &
-            (data_frame['planned_call_flag'] == 1)
-        ]
+    def _prepare_data_frame(self, lazy_frame: pl.LazyFrame) -> pl.LazyFrame:
+        lazy_frame = lazy_frame.select([
+            *(pl.col(old_name).alias(new_name)
+              for old_name, new_name in constants.COLUMN_MAPPING.items()),
+            pl.col('planned_call_flag')
+        ])
 
-        data_frame = data_frame[constants.COLUMN_MAPPING.keys()].rename(columns=constants.COLUMN_MAPPING)
-        data_frame['timestamp'] = pd.to_datetime(
-            data_frame['timestamp'].str.replace(' ', '')
+        lazy_frame = lazy_frame.with_columns(
+            pl.col(constants.COLUMN_TIMESTAMP).str.to_datetime().dt.truncate('1mo'),
         )
 
-        return data_frame
+        lazy_frame = lazy_frame.filter(
+            (pl.col('channel') == constants.INTERACTION_CHANNEL_CALL)
+            & (pl.col('type') == constants.INTERACTION_TYPE_IN_PERSON)
+            & (pl.col('acceptation') == 1)
+            & (pl.col('planned_call_flag') == True)
+        )
 
-    def process(self) -> pd.DataFrame:
-        df = self.processing_data_frame.sort_values(by='timestamp')
+        return lazy_frame
 
-        df['type'] = constants.METRIC_TYPE_INTERACTIONS
-        df['indicator'] = constants.INDICATOR_NEXT_CALL
-        df['value'] = df['timestamp'].apply(lambda x: x.isoformat())
-        df['metrics'] = constants.METRIC_DATE
-        df['period'] = global_constants.PERIOD_DAY
+    def process(self) -> pl.LazyFrame:
+        lazy_frame = self.processing_lazy_frame.sort(constants.COLUMN_TIMESTAMP)
 
-        return df[constants.COMMON_GROUP_COLUMNS + ['timestamp', 'value', 'metrics', 'indicator', 'period', 'type', 'subject']]
+        lazy_frame = lazy_frame.select([
+            *[pl.col(new_name)
+              for new_name in constants.COMMON_GROUP_COLUMNS],
+            pl.col(constants.COLUMN_TIMESTAMP),
+            pl.lit(constants.INDICATOR_NEXT_CALL).alias('indicator'),
+            pl.lit(1.0).alias('value'),
+            pl.lit(constants.METRIC_DATE).alias('metric'),
+            pl.lit(global_constants.PERIOD_DAY).alias('period'),
+            pl.lit(constants.METRIC_TYPE_INTERACTIONS).alias('metric_type'),
+        ])
+
+        return ProcessorHelper.select_metric_columns(lazy_frame, constants.COMMON_GROUP_COLUMNS)

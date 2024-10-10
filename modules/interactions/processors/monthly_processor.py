@@ -1,61 +1,59 @@
 from typing import Optional
 
-import numpy as np
-import pandas as pd
+import polars as pl
 
 from modules import global_constants
 from modules.global_utils import ProcessorHelper
 from modules.interactions import constants
 from modules.interactions.processors.timeseries_processor import TimeSeriesProcessor
 
+
 class MonthlyProcessor(TimeSeriesProcessor):
 
-    def process(self) -> Optional[pd.DataFrame]:
-        df = self.processing_data_frame.sort_values(by='timestamp')
-        output_df = pd.DataFrame()
-
-        df.loc[:, constants.COLUMN_LAST_YEAR_TOTAL_ACTIONS] = df.groupby(
-            constants.COMMON_GROUP_COLUMNS
-        )[constants.COLUMN_TOTAL_ACTIONS].shift(12)
-
-        df.loc[:, constants.COLUMN_LAST_YEAR_TOTAL_ACTIONS] = (
-            df[constants.COLUMN_LAST_YEAR_TOTAL_ACTIONS].fillna(0)
+    def process(self) -> Optional[pl.LazyFrame]:
+        lazy_frame = self.processing_lazy_frame.sort(constants.COLUMN_TIMESTAMP)
+        lazy_frame = lazy_frame.with_columns(
+            pl.col(constants.COLUMN_TOTAL_ACTIONS).shift(12, fill_value=0).over(constants.COMMON_GROUP_COLUMNS).alias(
+                constants.COLUMN_LAST_YEAR_TOTAL_ACTIONS),
         )
 
-        df.loc[:, constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR] = (
-            df.apply(lambda row: ProcessorHelper.calculate_percentage_change(
-                row[constants.COLUMN_TOTAL_ACTIONS],
-                row[constants.COLUMN_LAST_YEAR_TOTAL_ACTIONS]
-            ), axis=1)
+        lazy_frame = lazy_frame.with_columns(
+            (
+                    (
+                            pl.col(constants.COLUMN_TOTAL_ACTIONS) - pl.col(constants.COLUMN_LAST_YEAR_TOTAL_ACTIONS)
+                    ) / pl.col(constants.COLUMN_LAST_YEAR_TOTAL_ACTIONS) * 100
+            ).alias(constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR),
         )
 
-        df = df.replace([np.inf, -np.inf], 0)
-
-        columns_to_fill = [
-            constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR,
-        ]
-        df[columns_to_fill] = df[columns_to_fill].fillna(0)
-
-        output_df = ProcessorHelper.append_additional_metrics(
-            df=df,
-            metric=constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR,
-            metric_name=constants.METRIC_PERCENTAGE,
-            metric_type=constants.METRIC_TYPE_INTERACTIONS,
-            indicator=constants.INDICATOR_TOTAL_ACTIONS_CHANGE_PREVIOUS_YEAR,
-            period=global_constants.PERIOD_MONTH,
-            group_by=constants.COMMON_GROUP_COLUMNS + ['year', 'month'],
-            new_df=output_df
+        lazy_frame = lazy_frame.with_columns(
+            pl.when(pl.col(constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR).is_infinite() |
+                    pl.col(constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR).is_null() |
+                    pl.col(constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR).is_nan())
+            .then(0)
+            .otherwise(pl.col(constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR))
+            .round(2).alias(constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR),
         )
 
-        output_df = ProcessorHelper.append_additional_metrics(
-            df=df,
-            metric=constants.COLUMN_TOTAL_ACTIONS,
-            metric_name=constants.METRIC_INTERACTIONS,
-            metric_type=constants.METRIC_TYPE_INTERACTIONS,
-            indicator=constants.INDICATOR_TOTAL_ACTIONS,
-            period=global_constants.PERIOD_MONTH,
-            group_by=constants.COMMON_GROUP_COLUMNS + ['year', 'month'],
-            new_df=output_df
-        )
+        lazy_frame = lazy_frame.drop([constants.COLUMN_LAST_YEAR_TOTAL_ACTIONS])
 
-        return output_df
+        return ProcessorHelper.melt_lazy_frame(
+            lazy_frame,
+            [
+                constants.COLUMN_TOTAL_ACTIONS,
+                constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR,
+            ],
+            constants.COMMON_GROUP_COLUMNS,
+            {
+                constants.COLUMN_TOTAL_ACTIONS: constants.INDICATOR_TOTAL_ACTIONS,
+                constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR: constants.INDICATOR_TOTAL_ACTIONS_CHANGE_PREVIOUS_YEAR,
+            },
+            {
+                constants.COLUMN_TOTAL_ACTIONS: constants.METRIC_INTERACTIONS,
+                constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR: constants.METRIC_PERCENTAGE
+            },
+            {
+                constants.COLUMN_TOTAL_ACTIONS: global_constants.PERIOD_MONTH,
+                constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR: global_constants.PERIOD_MONTH
+            },
+            constants.METRIC_TYPE_INTERACTIONS
+        )

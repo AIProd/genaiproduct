@@ -4,7 +4,6 @@ COMMON_GROUP_COLUMNS = [
     'account_uuid',
     'hcp_uuid',
     'product_name',
-    'product_priority',
     'territory',
     'channel',
     'category',
@@ -16,7 +15,7 @@ COLUMN_MAPPING = {
     'hcp_uuid': 'hcp_uuid',
     'employee_uuid': 'employee_uuid',
     'brand_name': 'product_name',
-    'product_priority':'product_priority',
+    'product_priority': 'product_priority',
     'ter_code': 'territory',
     'sales': 'sales',
     'units': 'units',
@@ -66,10 +65,14 @@ METRIC_PERCENTAGE = '%'
 
 INDICATOR_SALES = 'sales'
 INDICATOR_UNITS = 'units'
-INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR = 'rolling_quarter_change_previous_year'
-INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR = 'mat_growth_change_previous_year'
-INDICATOR_ROLLING_QUARTER = 'ROLQ'
-INDICATOR_MOVING_ANNUAL_TOTAL = 'MAT'
+INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR_SALES = 'rolling_quarter_change_previous_year_sales'
+INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR_SALES = 'mat_growth_change_previous_year_sales'
+INDICATOR_ROLLING_QUARTER_SALES = 'rolling_quarter_sales'
+INDICATOR_MOVING_ANNUAL_TOTAL_SALES = 'moving_annual_total_sales'
+INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR_UNITS = 'rolling_quarter_change_previous_year_units'
+INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR_UNITS = 'mat_growth_change_previous_year_units'
+INDICATOR_ROLLING_QUARTER_UNITS = 'rolling_quarter_units'
+INDICATOR_MOVING_ANNUAL_TOTAL_UNITS = 'moving_annual_total_units'
 INDICATOR_SALES_CHANGE_PREVIOUS_YEAR = 'sales_change_previous_year'
 INDICATOR_UNITS_CHANGE_PREVIOUS_YEAR = 'units_change_previous_year'
 

@@ -1,5 +1,9 @@
-import pandas as pd
-from datetime import datetime, timedelta
+import polars as pl
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+from modules import global_constants
+from modules.global_utils import ProcessorHelper
 from modules.interactions.processors.processor import Processor
 from modules.interactions import constants
 
@@ -9,36 +13,42 @@ class HighPriorityEngagementDataProcessor(Processor):
         self.days = days
         super().__init__(input_data_frame)
 
-    def _prepare_data_frame(self, data_frame: pd.DataFrame) -> pd.DataFrame:
+    def _prepare_data_frame(self, lazy_frame: pl.LazyFrame) -> pl.LazyFrame:
+        start_date = datetime.now() - relativedelta(days=self.days)
 
-        start_date = datetime.now() - timedelta(days=self.days)
+        lazy_frame = lazy_frame.select([
+            pl.col(old_name).alias(new_name)
+            for old_name, new_name in constants.COLUMN_MAPPING.items()
+        ])
 
-        data_frame = data_frame[constants.COLUMN_MAPPING.keys()].rename(columns=constants.COLUMN_MAPPING)
-        data_frame['timestamp'] = pd.to_datetime(data_frame['timestamp'].str.replace(' ', ''))
-        data_frame = data_frame[data_frame['timestamp'] >= start_date]
+        lazy_frame = lazy_frame.with_columns(
+            pl.col(constants.COLUMN_TIMESTAMP).str.to_datetime(),
+        )
 
-        data_frame = data_frame[(data_frame['ter_target'].isin(['A', 'B'])) &
-                                (data_frame['channel']!="Face to Face")]
+        lazy_frame.filter(
+            pl.col('ter_target').is_in(constants.HIGH_PRIORITY_TERRITORY_TARGETS)
+            & (pl.col('channel') != 'Face to Face')
+            & (pl.col(constants.COLUMN_TIMESTAMP) >= start_date)
+        )
 
-        data_frame = data_frame[
-            (data_frame['total_opens'] == 0) &
-            (data_frame['total_actions'] == 0) &
-            (data_frame['acceptation'] == 0) &
-            (data_frame['reaction'] == 0)
-            ]
 
-        return data_frame
+        return lazy_frame
 
-    def process(self) -> pd.DataFrame:
+    def process(self) -> pl.LazyFrame:
+        lazy_frame = self.processing_lazy_frame
 
-        df = self.processing_data_frame
+        lazy_frame = lazy_frame.select([
+            *[pl.col(new_name)
+              for new_name in constants.COMMON_GROUP_COLUMNS],
+            pl.col(constants.COLUMN_TIMESTAMP),
+            pl.lit(constants.INDICATOR_HIGH_PRIORITY_ACCOUNT_DAYS_WITHOUT_INTERACTION).alias('indicator'),
+            pl.col(constants.COLUMN_TIMESTAMP).sub(datetime.now()).dt.total_days().alias('value').cast(pl.Float64),
+            pl.lit(constants.METRIC_DAYS).alias('metric'),
+            pl.lit(global_constants.PERIOD_DAY).alias('period'),
+            pl.lit(constants.METRIC_TYPE_INTERACTIONS).alias('metric_type'),
+        ])
 
-        df['value'] = (pd.Timestamp.now() - pd.to_datetime(df['timestamp'])).dt.days
-        df['metrics'] = 'days_passed_no_interaction'
-        df['indicator'] = 'high_priority_engagements'
-        df['period'] = 'days'
-
-        return df
+        return ProcessorHelper.select_metric_columns(lazy_frame, constants.COMMON_GROUP_COLUMNS)
 
 
 

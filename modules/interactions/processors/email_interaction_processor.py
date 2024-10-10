@@ -1,9 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional
+from dateutil.relativedelta import relativedelta
 
-import pandas as pd
+import polars as pl
 
 from modules import global_constants
+from modules.global_utils import ProcessorHelper
 from modules.interactions import constants
 from modules.interactions.processors.processor import Processor
 
@@ -13,23 +15,37 @@ class EmailInteractionProcessor(Processor):
         self.days = days
         super().__init__(input_data_frame)
 
-    def _prepare_data_frame(self, data_frame: pd.DataFrame) -> pd.DataFrame:
-        start_date = datetime.now() - timedelta(days=self.days)
-        data_frame = data_frame[constants.COLUMN_MAPPING.keys()].rename(columns=constants.COLUMN_MAPPING)
-        data_frame['timestamp'] = pd.to_datetime(
-            data_frame['timestamp'].str.replace(' ', '')
+    def _prepare_data_frame(self, lazy_frame: pl.LazyFrame) -> pl.LazyFrame:
+        start_date = datetime.now() - relativedelta(days=self.days)
+        lazy_frame = lazy_frame.select([
+            pl.col(old_name).alias(new_name)
+            for old_name, new_name in constants.COLUMN_MAPPING.items()
+        ])
+
+        lazy_frame = lazy_frame.with_columns(
+            pl.col(constants.COLUMN_TIMESTAMP).str.to_datetime(),
         )
-        data_frame = data_frame[data_frame['timestamp'] >= start_date]
-        data_frame = data_frame[data_frame['channel'].isin(constants.EMAIL_CHANNELS)]
 
-        return data_frame
+        lazy_frame = lazy_frame.filter(
+            (pl.col(constants.COLUMN_TIMESTAMP) >= start_date)
+            & (pl.col('channel').is_in(constants.EMAIL_CHANNELS))
+        )
 
-    def process(self) -> Optional[pd.DataFrame]:
-        df = self.processing_data_frame
-        df['value'] = (pd.Timestamp.now() - pd.to_datetime(df['timestamp'])).dt.days
-        df['metrics'] = constants.METRIC_DAYS
-        df['indicator'] = constants.INDICATOR_MARKETING_EMAIL
-        df['period'] = global_constants.PERIOD_DAY
-        df['type'] = constants.METRIC_TYPE_INTERACTIONS
+        return lazy_frame
 
-        return df[constants.COMMON_GROUP_COLUMNS + ['timestamp', 'value', 'metrics', 'indicator', 'period', 'type', 'subject']]
+    def process(self) -> Optional[pl.LazyFrame]:
+        lazy_frame = self.processing_lazy_frame
+
+        lazy_frame = lazy_frame.select([
+            *[pl.col(new_name)
+              for new_name in constants.COMMON_GROUP_COLUMNS],
+            pl.col(constants.COLUMN_TIMESTAMP),
+            pl.lit(constants.INDICATOR_MARKETING_EMAIL).alias('indicator'),
+            pl.col(constants.COLUMN_TIMESTAMP).sub(datetime.now()).dt.total_days().alias('value').cast(pl.Float64),
+            pl.lit(constants.METRIC_DAYS).alias('metric'),
+            pl.lit(global_constants.PERIOD_DAY).alias('period'),
+            pl.lit(constants.METRIC_TYPE_INTERACTIONS).alias('metric_type'),
+        ])
+
+        return ProcessorHelper.select_metric_columns(lazy_frame, constants.COMMON_GROUP_COLUMNS)
+

@@ -47,9 +47,10 @@ class EmailFinding(Finding):
 
         if not subjects:
             return f"No emails."
+
         prompt = f"Ingest and combine all the emails subjects together and output just a concise one line in english : {subjects}."
         llm = get_llm()
-        response = llm.invoke(
+        response = llm(
             [
                 HumanMessage(
                     content=prompt

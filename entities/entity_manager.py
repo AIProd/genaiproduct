@@ -1,145 +1,111 @@
-import math
-from dataclasses import asdict
-from typing import Dict, Type, TypeVar, List, Tuple, Any, Optional
+from typing import Dict, Type, Optional, Any, TypeVar
+from uuid import uuid4
 
-import numpy as np
-import pandas as pd
+import polars as pl
+from polars import Int64, Float64, String, Boolean
 
-from entities.account import Account
-from entities.employee import Employee
-from entities.hcp import HCP
+from entities.entity_classes.account import Account
+from entities.entity_classes.employee import Employee
+from entities.entity_classes.hcp import HCP
 
 T = TypeVar('T', bound=Account | HCP | Employee)
 
 
 class EntityManager:
-
     def __init__(self):
-        self.mappings: Dict[Type, Dict[str, str]] = {}
-        self.foreign_keys: Dict[Type, Dict[str, Tuple[Type, str, str]]] = {}
-        self.entities: Dict[Type, Dict[str, Any]] = {}
+        self.entity_cache: Dict[Type[T], pl.LazyFrame] = {}
+        self.mappings: Dict[Type[T], Dict[str, str]] = {}
+        self.relations: Dict[Type[T], Dict[str, Dict[str, str]]] = {}
 
-    def register_mapping(self, entity_class: Type[T], mapping: Dict[str, str]):
-        """Register a mapping for an entity class."""
+    def register_mapping(self, entity_class: Type[T], mapping: Optional[Dict[str, str]] = None):
         self.mappings[entity_class] = mapping
+        schema = self.get_entity_schema(entity_class)
+        self.entity_cache[entity_class] = pl.LazyFrame(schema=schema)
 
-    def get_mapping(self, entity_class: Type) -> Dict[str, str]:
-        """Get the mapping for an entity class."""
-        return self.mappings.get(entity_class, {})
-
-    def register_foreign_key(self, entity_class: Type, fk_attr: str, related_class: Type, related_attr: str,
-                             linking_attr: str):
-        """
-        Register a foreign key relationship between two entity classes.
-
-        Parameters:
-        - entity_class: The class of the entity that will have the foreign key attribute.
-        - fk_attr: The name of the attribute in entity_class that will store the foreign key.
-        - related_class: The class of the entity being referenced by the foreign key.
-        - related_attr: The attribute in the related_class that is being referenced
-                        (typically 'uuid' for the auto-generated identifier).
-        - linking_attr: The name of the column in the original DataFrame that contains
-                        the data to link entity_class instances to related_class instances.
-        """
-        if entity_class not in self.foreign_keys:
-            self.foreign_keys[entity_class] = {}
-        self.foreign_keys[entity_class][fk_attr] = (related_class, related_attr, linking_attr)
-
-    def from_dataframe(self, df: pd.DataFrame, entity_class: Type[T], related_entities: Optional[List[T]] = None) -> \
-    List[T]:
-        """
-        Create entity objects from a DataFrame using the registered mapping.
-        This method also handles linking foreign keys if any are registered for the entity class.
-        """
-        mapping = self.mappings.get(entity_class, {})
-        if not mapping:
-            raise ValueError(f"No mapping registered for {entity_class.__name__}")
-
-        missing_columns = set(mapping.values()) - set(df.columns)
-        if missing_columns:
-            raise ValueError(f"Columns {missing_columns} not found in DataFrame")
-
-        reverse_mapping = {v: k for k, v in mapping.items()}
-        df_mapped = df.rename(columns=reverse_mapping)
-        df_unique = df_mapped.drop_duplicates(mapping.keys())
-        columns_to_replace = list(mapping.keys())
-        df_unique[columns_to_replace] = df_unique[columns_to_replace].astype(object).where(df_unique[columns_to_replace].notna(), None)
-        does_entity_class_have_foreign_key = entity_class in self.foreign_keys
-
-        if does_entity_class_have_foreign_key:
-            # Pre-process related entities for faster lookup
-            related_entity_dict = {}
-            for fk_attr, (related_class, related_attr, linking_attr) in self.foreign_keys[entity_class].items():
-                related_entity_dict[fk_attr] = {
-                    getattr(related_ent, related_attr): related_ent.uuid
-                    for related_ent in related_entities
-                }
-
-        def create_entity(row):
-            entity_data = row.to_dict()
-            if all(entity_data.get(key) is None for key in mapping.keys()):
-                return None
-
-            entity = entity_class.from_dict(entity_data)
-
-            if does_entity_class_have_foreign_key:
-                for fk_attr, (_, _, linking_attr) in self.foreign_keys[entity_class].items():
-                    linking_value = entity_data[linking_attr]
-                    related_uuid = related_entity_dict[fk_attr].get(linking_value)
-                    if related_uuid:
-                        setattr(entity, fk_attr, related_uuid)
-
-            return entity
-
-        entities = df_unique.apply(create_entity, axis=1).tolist()
-        original_generator = (item for item in entities if item is not None)
-
-        filtered_list: List[T] = list(
-            filter(lambda x: isinstance(x, (Account, HCP, Employee)), original_generator))
-
-        return filtered_list
+    def register_relation(
+            self,
+            entity_class: Type[T],
+            related_class: Type[T],
+            relation_attribute: str,
+            related_attribute: str,
+            linking_attribute: str,
+            linking_column: str
+    ):
+        self.relations[entity_class] = {
+            related_class: {
+                'relation_attribute': relation_attribute,
+                'related_attribute': related_attribute,
+                'linking_attribute': linking_attribute,
+                'linking_column': linking_column
+            }
+        }
 
     @staticmethod
-    def __validate_instance_types(instance_list, expected_type) -> bool:
-        for index, item in enumerate(instance_list):
-            if not isinstance(item, expected_type):
-                return False
+    def get_entity_schema(entity_class: Type[T]) -> dict[Any, Type[Int64 | Float64 | String | Boolean]]:
+        type_mapping = {
+            int: pl.Int64,
+            float: pl.Float64,
+            str: pl.Utf8,
+            bool: pl.Boolean,
+        }
 
-        return True
+        return {
+            attr: type_mapping.get(typ, pl.Utf8)
+            for attr, typ in entity_class.__annotations__.items()
+        }
 
-    @staticmethod
-    def to_dataframe(entities: List[T]) -> pd.DataFrame:
-        """Convert a list of entities to a DataFrame."""
-        return pd.DataFrame([asdict(entity) for entity in entities])
+    def from_lazy_frame(self, entity_class: Type[T], lazy_frame: pl.LazyFrame) -> pl.LazyFrame:
+        mapping = self.mappings[entity_class]
 
-    def supplement_entities(self, df: pd.DataFrame, entity_class: Type[T], entities: List[T]):
-        """Replace original columns that corresponds to entity for unique uuid from entity"""
-        mapping = self.mappings.get(entity_class, {})
-        if not mapping:
-            raise ValueError(f"No mapping registered for {entity_class.__name__}")
+        select_columns = list(mapping.values())
+        rename_mapping = {v: k for k, v in mapping.items()}
 
-        missing_columns = set(mapping.values()) - set(df.columns)
+        has_relation = False
+        if self.relations.get(entity_class):
+            has_relation = True
+            for entity, relation_mapping in self.relations[entity_class].items():
+                select_columns.append(relation_mapping['linking_column'])
 
-        if missing_columns:
-            raise ValueError(f"Columns {missing_columns} not found in DataFrame")
+        new_data_lf = lazy_frame.select(
+            select_columns,
+        ).rename(rename_mapping).unique()
 
-        columns_to_replace = list(mapping.values())
-        df[columns_to_replace] = df[columns_to_replace].astype(object).where(df[columns_to_replace].notna(), None)
+        height = new_data_lf.select(pl.len()).collect().item()
 
-        entity_key = f"{entity_class.__name__.lower()}_uuid"
+        new_data_lf = new_data_lf.with_columns(
+            pl.Series(name='uuid', values=[str(uuid4()) for _ in range(height)])
+        )
 
-        entity_dict = {tuple(getattr(entity, attr) for attr in mapping.keys()): str(entity.uuid) for entity in entities}
+        if has_relation:
+            for entity, relation_mapping in self.relations[entity_class].items():
+                cached_entity_lf = self.entity_cache[entity]
+                new_data_lf = new_data_lf.join(
+                    cached_entity_lf.select(
+                        pl.col(relation_mapping['linking_attribute']),
+                        pl.col(relation_mapping['related_attribute']).alias(relation_mapping['relation_attribute']),
+                    ),
+                    left_on=relation_mapping['linking_column'],
+                    right_on=relation_mapping['linking_attribute'],
+                    how='left'
+                )
 
-        def get_uuid(row):
-            key = tuple(row[mapping[attr]] for attr in mapping.keys())
-            return entity_dict.get(key, None)
+        self.entity_cache[entity_class] = new_data_lf.select(entity_class.__annotations__.keys())
 
-        df[entity_key] = df.apply(get_uuid, axis=1)
+        return self.entity_cache[entity_class]
 
-        df_result = df.drop(columns=list(mapping.values()))
+    def get_by_primary_key(self, entity_class: Type[T], key: Any) -> Optional[T]:
+        primary_key = entity_class.get_primary_key()
+        if not primary_key:
+            raise ValueError(f"No primary key defined for {entity_class.__name__}")
 
-        return df_result
+        result = (
+            self.entity_cache[entity_class]
+            .filter(pl.col(primary_key) == key)
+            .collect()
+        )
 
+        if result.is_empty():
+            return None
 
-
-
+        row = result.row(0, named=True)
+        return entity_class(**row)
