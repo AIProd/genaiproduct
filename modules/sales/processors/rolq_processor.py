@@ -78,7 +78,7 @@ class ROLQProcessor(TimeSeriesProcessor):
                 constants.PERCENTAGE_ROLLING_QUARTER_COLUMN_SALES_CHANGE_LAST_YEAR,
                 constants.PERCENTAGE_ROLLING_QUARTER_COLUMN_UNITS_CHANGE_LAST_YEAR,
             ],
-            constants.COMMON_GROUP_COLUMNS,
+            constants.COMMON_GROUP_COLUMNS + [constants.COLUMN_TIMESTAMP],
             {
                 constants.ROLLING_QUARTER_COLUMN_SALES: constants.INDICATOR_ROLLING_QUARTER_SALES,
                 constants.ROLLING_QUARTER_COLUMN_UNITS: constants.INDICATOR_ROLLING_QUARTER_UNITS,

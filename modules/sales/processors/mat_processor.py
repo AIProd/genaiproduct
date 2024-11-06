@@ -78,7 +78,7 @@ class MATProcessor(TimeSeriesProcessor):
                 constants.PERCENTAGE_MOVING_ANNUAL_TOTAL_COLUMN_SALES_CHANGE_LAST_YEAR,
                 constants.PERCENTAGE_MOVING_ANNUAL_TOTAL_COLUMN_UNITS_CHANGE_LAST_YEAR,
             ],
-            constants.COMMON_GROUP_COLUMNS,
+            constants.COMMON_GROUP_COLUMNS + [constants.COLUMN_TIMESTAMP],
             {
                 constants.MOVING_ANNUAL_TOTAL_COLUMN_SALES: constants.INDICATOR_MOVING_ANNUAL_TOTAL_SALES,
                 constants.MOVING_ANNUAL_TOTAL_COLUMN_UNITS: constants.INDICATOR_MOVING_ANNUAL_TOTAL_UNITS,

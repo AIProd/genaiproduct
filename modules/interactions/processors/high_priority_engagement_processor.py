@@ -41,6 +41,7 @@ class HighPriorityEngagementDataProcessor(Processor):
             *[pl.col(new_name)
               for new_name in constants.COMMON_GROUP_COLUMNS],
             pl.col(constants.COLUMN_TIMESTAMP),
+            pl.col(constants.COLUMN_SUBJECT),
             pl.lit(constants.INDICATOR_HIGH_PRIORITY_ACCOUNT_DAYS_WITHOUT_INTERACTION).alias('indicator'),
             pl.col(constants.COLUMN_TIMESTAMP).sub(datetime.now()).dt.total_days().alias('value').cast(pl.Float64),
             pl.lit(constants.METRIC_DAYS).alias('metric'),
@@ -48,7 +49,10 @@ class HighPriorityEngagementDataProcessor(Processor):
             pl.lit(constants.METRIC_TYPE_INTERACTIONS).alias('metric_type'),
         ])
 
-        return ProcessorHelper.select_metric_columns(lazy_frame, constants.COMMON_GROUP_COLUMNS)
+        return ProcessorHelper.select_metric_columns(
+            lazy_frame,
+            constants.COMMON_GROUP_COLUMNS + [constants.COLUMN_TIMESTAMP, constants.COLUMN_SUBJECT]
+        )
 
 
 

@@ -3,7 +3,8 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 
-from generation.constants import BUSINESS_DAYS_COUNT, PERIOD_DAILY, INDICATOR_NEXT_CALL
+from generation.constants import PERIOD_DAILY, INDICATOR_NEXT_CALL
+from generation.utils import get_number_of_days_forward_for_planned_visits
 
 
 class PlannedVisitsProcessor:
@@ -26,12 +27,13 @@ class PlannedVisitsProcessor:
 
     def _filter_for_upcoming_visits(self) -> None:
         tomorrow = datetime.now() + relativedelta(days=1)
-        business_days = pd.date_range(start=tomorrow, periods=BUSINESS_DAYS_COUNT, freq='B')
+        business_days = pd.date_range(start=tomorrow, periods=get_number_of_days_forward_for_planned_visits(), freq='B')
         self.output_data_frame = self.processing_data_frame[
             pd.to_datetime(self.processing_data_frame['timestamp']).dt.date.isin(business_days.date)
         ]
 
-        self.output_data_frame = self.output_data_frame.drop_duplicates(subset=['hcp_uuid', 'employee_uuid', 'account_uuid', 'timestamp'])
+        self.output_data_frame = self.output_data_frame.drop_duplicates(
+            subset=['hcp_uuid', 'employee_uuid', 'account_uuid', 'timestamp'])
 
     def _calculate_planned_visits(self) -> None:
         self.output_data_frame['period'] = PERIOD_DAILY

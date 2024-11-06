@@ -58,7 +58,7 @@ class MonthlyProcessor(TimeSeriesProcessor):
                 constants.PERCENTAGE_COLUMN_SALES_CHANGE_LAST_YEAR,
                 constants.PERCENTAGE_COLUMN_UNITS_CHANGE_LAST_YEAR
             ],
-            constants.COMMON_GROUP_COLUMNS,
+            constants.COMMON_GROUP_COLUMNS + [constants.COLUMN_TIMESTAMP],
             {
                 constants.COLUMN_SALES: constants.INDICATOR_SALES,
                 constants.COLUMN_UNITS: constants.INDICATOR_UNITS,

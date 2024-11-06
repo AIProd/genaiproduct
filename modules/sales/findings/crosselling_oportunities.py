@@ -1,8 +1,9 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional, List
 
 import numpy as np
 import pandas as pd
+from dateutil.relativedelta import relativedelta
 
 from modules.global_utils import FindingResult
 from modules.sales import constants
@@ -24,7 +25,7 @@ class CrossSellingFinding(Finding):
             return None
 
         account_data = self._preprocess_data(data)
-        cutoff_date = datetime.now() - timedelta(days=self.months_threshold * 30)
+        cutoff_date = datetime.now() - relativedelta(months=self.months_threshold)
         account_products = self._get_recent_purchases(account_data)
 
         merged_df = self._merge_with_hcp_data(account_data)
@@ -48,7 +49,7 @@ class CrossSellingFinding(Finding):
                 account_uuid=account_uuid,
                 hcp_uuid=hcp_uuid,
                 employee_uuid=employee_uuid,
-                product_name=None,
+                product_name='',
                 type=constants.FINDING_TYPE_CROSS_SELLING_OPPORTUNITIES,
                 details=details
             )

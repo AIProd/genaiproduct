@@ -2,7 +2,7 @@ import pandas as pd
 
 from modules.sales.findings.cantonal_findings import CantonalFinding
 from modules.sales.findings.crosselling_oportunities import CrossSellingFinding
-from modules.sales.findings.highperforming_account import HighperformingAccounts
+from modules.sales.findings.high_performing_account import HighPerformingAccounts
 from modules.sales.findings.mat_trends import MATTrends
 from modules.sales.findings.msd_orders import MSDFinding
 from modules.sales.findings.underperforming_accounts import UnderperformingAccounts
@@ -24,7 +24,7 @@ class SalesFindingsProcessor:
                     MATTrends(),
                     CantonalFinding(hcps_df),
                     UnderperformingAccounts(),
-                    HighperformingAccounts()
+                    HighPerformingAccounts()
                 ],
             },
         ]
@@ -34,6 +34,7 @@ class SalesFindingsProcessor:
                                                        'hcp_uuid',
                                                        'employee_uuid',
                                                        'type',
+                                                       'product_name',
                                                        'details',
                                                        'timestamp',
                                                        ])
@@ -47,7 +48,18 @@ class SalesFindingsProcessor:
                     if result:
                         findings.extend(result)
 
-        self.output_data_frame = pd.DataFrame([finding.__dict__ for finding in findings])
+        self.output_data_frame = pd.DataFrame(
+            columns=[
+                'account_uuid',
+                'hcp_uuid',
+                'employee_uuid',
+                'product_name',
+                'type',
+                'details',
+                'timestamp',
+            ],
+            data=[finding.__dict__ for finding in findings]
+        )
 
     def get_processed_data(self):
         return self.output_data_frame

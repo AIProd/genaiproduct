@@ -1,14 +1,21 @@
 import polars as pl
 
+from modules.global_utils import ProcessorHelper
+from modules.interactions.processors.annual_processor import AnnualProcessor
+from modules.interactions.processors.bounced_email_interaction_processor import BouncedEmailInteractionProcessor
 from modules.interactions.processors.call_processor import CallProcessor
+from modules.interactions.processors.clicked_email_interaction_processor import ClickedEmailInteractionProcessor
 from modules.interactions.processors.email_interaction_processor import EmailInteractionProcessor
 from modules.interactions.processors.high_priority_engagement_processor import HighPriorityEngagementDataProcessor
 from modules.interactions.processors.mat_processor import MATProcessor
+from modules.interactions.processors.mat_processor_ungrouped import MATProcessorUngrouped
 from modules.interactions.processors.monthly_processor import MonthlyProcessor
-from modules.interactions.processors.annual_processor import AnnualProcessor
 from modules.interactions.processors.next_calls_processor import NextCallsProcessor
 from modules.interactions.processors.percentage_processor import PercentageProcessor
+from modules.interactions.processors.read_email_interaction_processor import ReadEmailInteractionProcessor
 from modules.interactions.processors.rolq_processor import ROLQProcessor
+from modules.interactions.processors.rolq_processor_ungrouped import ROLQProcessorUngrouped
+from modules.interactions.processors.unread_email_interaction_processor import UnreadEmailInteractionProcessor
 
 
 class InteractionsDataProcessor:
@@ -29,11 +36,17 @@ class InteractionsDataProcessor:
             'AnnualProcessor': AnnualProcessor,
             'MATProcessor': MATProcessor,
             'ROLQProcessor': ROLQProcessor,
+            'MATProcessorUngrouped': MATProcessorUngrouped,
+            'ROLQProcessorUngrouped': ROLQProcessorUngrouped,
             'NextCallsProcessor': NextCallsProcessor,
             'PercentageProcessor': PercentageProcessor,
             'EmailInteractionProcessor': EmailInteractionProcessor,
             'CallProcessor': CallProcessor,
             'HighPriorityEngagementDataProcessor': HighPriorityEngagementDataProcessor,
+            'ClickedEmailInteractionProcessor': ClickedEmailInteractionProcessor,
+            'BouncedEmailInteractionProcessor': BouncedEmailInteractionProcessor,
+            'ReadEmailInteractionProcessor': ReadEmailInteractionProcessor,
+            'UnreadEmailInteractionProcessor': UnreadEmailInteractionProcessor,
         }
 
     @property
@@ -70,6 +83,7 @@ class InteractionsDataProcessor:
         processor_object = processor_class(self.input_lazy_frame)
         output_lazy_frame = processor_object.process()
         del processor_object
+        output_lazy_frame = ProcessorHelper.enforce_metrics_schema(output_lazy_frame)
 
         return output_lazy_frame.collect() if compute else output_lazy_frame
 

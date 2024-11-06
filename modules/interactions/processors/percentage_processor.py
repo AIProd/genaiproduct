@@ -18,9 +18,10 @@ class PercentageProcessor(TimeSeriesProcessor):
             every='1mo',
             group_by=constants.COMMON_GROUP_COLUMNS,
         ).agg(
-            ((pl.col(constants.COLUMN_REACTION).sum() / pl.count()) * 100).alias(constants.PERCENTAGE_COLUMN_REACTION),
-            ((pl.col(constants.COLUMN_ACCEPTATION).sum() / pl.count()) * 100).alias(constants.PERCENTAGE_COLUMN_ACCEPTATION),
-            ((pl.col(constants.COLUMN_REJECTION).sum() / pl.count()) * 100).alias(constants.PERCENTAGE_COLUMN_REJECTION),
+            pl.lit('').alias(constants.COLUMN_SUBJECT),
+            ((pl.col(constants.COLUMN_REACTION).cast(pl.Float64).sum() / pl.count()) * 100).alias(constants.PERCENTAGE_COLUMN_REACTION),
+            ((pl.col(constants.COLUMN_ACCEPTATION).cast(pl.Float64).sum() / pl.count()) * 100).alias(constants.PERCENTAGE_COLUMN_ACCEPTATION),
+            ((pl.col(constants.COLUMN_REJECTION).cast(pl.Float64).sum() / pl.count()) * 100).alias(constants.PERCENTAGE_COLUMN_REJECTION),
         )
 
         return ProcessorHelper.melt_lazy_frame(
@@ -30,7 +31,7 @@ class PercentageProcessor(TimeSeriesProcessor):
                 constants.PERCENTAGE_COLUMN_ACCEPTATION,
                 constants.PERCENTAGE_COLUMN_REJECTION,
             ],
-            constants.COMMON_GROUP_COLUMNS,
+            constants.COMMON_GROUP_COLUMNS + [constants.COLUMN_TIMESTAMP, constants.COLUMN_SUBJECT],
             {
                 constants.PERCENTAGE_COLUMN_REACTION: constants.INDICATOR_REACTION_PERCENTAGE,
                 constants.PERCENTAGE_COLUMN_ACCEPTATION: constants.INDICATOR_ACCEPTATION_PERCENTAGE,

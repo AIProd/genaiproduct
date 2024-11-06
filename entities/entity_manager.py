@@ -13,14 +13,14 @@ T = TypeVar('T', bound=Account | HCP | Employee)
 
 class EntityManager:
     def __init__(self):
-        self.entity_cache: Dict[Type[T], pl.LazyFrame] = {}
+        self.entity_cache: Dict[Type[T], pl.DataFrame] = {}
         self.mappings: Dict[Type[T], Dict[str, str]] = {}
         self.relations: Dict[Type[T], Dict[str, Dict[str, str]]] = {}
 
     def register_mapping(self, entity_class: Type[T], mapping: Optional[Dict[str, str]] = None):
         self.mappings[entity_class] = mapping
         schema = self.get_entity_schema(entity_class)
-        self.entity_cache[entity_class] = pl.LazyFrame(schema=schema)
+        self.entity_cache[entity_class] = pl.DataFrame(schema=schema)
 
     def register_relation(
             self,
@@ -80,32 +80,41 @@ class EntityManager:
             for entity, relation_mapping in self.relations[entity_class].items():
                 cached_entity_lf = self.entity_cache[entity]
                 new_data_lf = new_data_lf.join(
-                    cached_entity_lf.select(
+                    cached_entity_lf.lazy().select(
                         pl.col(relation_mapping['linking_attribute']),
                         pl.col(relation_mapping['related_attribute']).alias(relation_mapping['relation_attribute']),
                     ),
                     left_on=relation_mapping['linking_column'],
                     right_on=relation_mapping['linking_attribute'],
-                    how='left'
+                    how='left',
                 )
 
-        self.entity_cache[entity_class] = new_data_lf.select(entity_class.__annotations__.keys())
+        self.entity_cache[entity_class] = new_data_lf.select(entity_class.__annotations__.keys()).collect()
 
         return self.entity_cache[entity_class]
 
-    def get_by_primary_key(self, entity_class: Type[T], key: Any) -> Optional[T]:
-        primary_key = entity_class.get_primary_key()
-        if not primary_key:
-            raise ValueError(f"No primary key defined for {entity_class.__name__}")
+    def supplement_entities(self, entity_class: Type[T], lazy_frame: pl.LazyFrame) -> pl.LazyFrame:
+        entity_name = entity_class.__name__.lower()
+        uuid_column = f"{entity_name}_uuid"
+        mapping = self.mappings[entity_class]
 
-        result = (
-            self.entity_cache[entity_class]
-            .filter(pl.col(primary_key) == key)
-            .collect()
+        entity_lazy_frame = self.entity_cache[entity_class]
+
+        joined_lf = lazy_frame.join(
+            entity_lazy_frame.lazy(),
+            left_on=list(mapping.values()),
+            right_on=list(mapping.keys()),
+            how='left',
+            join_nulls=True
+        ).rename(
+            {
+                'uuid': uuid_column
+            }
         )
 
-        if result.is_empty():
-            return None
-
-        row = result.row(0, named=True)
-        return entity_class(**row)
+        schema_names = set(lazy_frame.collect_schema().names())
+        result_columns = schema_names - set(mapping.values())
+        result_columns.add(uuid_column)
+        return joined_lf.select(
+           pl.col(name) for name in list(result_columns)
+        )

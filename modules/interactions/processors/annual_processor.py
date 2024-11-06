@@ -23,7 +23,8 @@ class AnnualProcessor(TimeSeriesProcessor):
             maintain_order=True
         ).agg(
             pl.col(constants.COLUMN_TIMESTAMP).first(),
-            pl.col(constants.COLUMN_TOTAL_ACTIONS).sum(),
+            pl.lit('').alias(constants.COLUMN_SUBJECT),
+            pl.col(constants.COLUMN_TOTAL_ACTIONS).count(),
             pl.col(constants.COLUMN_REJECTION).sum(),
             pl.col(constants.COLUMN_ACCEPTATION).sum(),
             pl.col(constants.COLUMN_REACTION).sum(),
@@ -59,7 +60,7 @@ class AnnualProcessor(TimeSeriesProcessor):
                 constants.COLUMN_TOTAL_ACTIONS,
                 constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR,
             ],
-            constants.COMMON_GROUP_COLUMNS,
+            constants.COMMON_GROUP_COLUMNS + [constants.COLUMN_TIMESTAMP, constants.COLUMN_SUBJECT],
             {
                 constants.COLUMN_TOTAL_ACTIONS: constants.INDICATOR_TOTAL_ACTIONS,
                 constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR: constants.INDICATOR_TOTAL_ACTIONS_CHANGE_PREVIOUS_YEAR,

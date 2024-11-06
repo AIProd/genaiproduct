@@ -30,13 +30,14 @@ def _resample_lazy_frame(lazy_frame: pl.LazyFrame) -> pl.LazyFrame:
 
     lazy_frame = lazy_frame.group_by(
         constants.COMMON_GROUP_COLUMNS + [
-            pl.col('timestamp').dt.year().alias('year'),
-            pl.col('timestamp').dt.month().alias('month')
+            pl.col(constants.COLUMN_TIMESTAMP).dt.year().alias('year'),
+            pl.col(constants.COLUMN_TIMESTAMP).dt.month().alias('month')
         ],
         maintain_order=True
     ).agg(
-        pl.col('timestamp').first(),
-        pl.col(constants.COLUMN_TOTAL_ACTIONS).sum(),
+        pl.col(constants.COLUMN_TIMESTAMP).first(),
+        pl.lit('').alias(constants.COLUMN_SUBJECT),
+        pl.col(constants.COLUMN_TOTAL_ACTIONS).count(),
         pl.col(constants.COLUMN_REJECTION).sum(),
         pl.col(constants.COLUMN_ACCEPTATION).sum(),
         pl.col(constants.COLUMN_REACTION).sum(),
@@ -44,27 +45,27 @@ def _resample_lazy_frame(lazy_frame: pl.LazyFrame) -> pl.LazyFrame:
 
     date_ranges = (
         lazy_frame.group_by(constants.COMMON_GROUP_COLUMNS, maintain_order=True)
-        .agg(pl.datetime_range(pl.col("timestamp").min(), previous_month_first_day, interval="1mo"))
-        .explode("timestamp")
+        .agg(pl.datetime_range(pl.col(constants.COLUMN_TIMESTAMP).min(), previous_month_first_day, interval="1mo"))
+        .explode(constants.COLUMN_TIMESTAMP)
         .with_columns(
-            pl.col('timestamp').dt.truncate('1mo'),
+            pl.col(constants.COLUMN_TIMESTAMP).dt.truncate('1mo'),
         )
     )
 
     return (
-        date_ranges.join(lazy_frame, on=constants.COMMON_GROUP_COLUMNS + ['timestamp'], how="left").fill_null(0)
+        date_ranges.join(lazy_frame, on=constants.COMMON_GROUP_COLUMNS + [constants.COLUMN_TIMESTAMP], how="left").fill_null(0)
     )
 
 def _resample_and_add_metadata(group, name):
     today = pd.Timestamp.today()
     last_month_end = (today - pd.offsets.MonthBegin(1)) - pd.Timedelta(days=1)
 
-    resampled = group.set_index('timestamp').resample('MS').sum()
+    resampled = group.set_index(constants.COLUMN_TIMESTAMP).resample('MS').sum()
     resampled = (
         resampled.reindex(pd.date_range(start=resampled.index.min(), end=last_month_end, freq='MS')).reset_index()
     )
 
-    resampled = resampled.rename(columns={'index': 'timestamp'})
+    resampled = resampled.rename(columns={'index': constants.COLUMN_TIMESTAMP})
 
     resampled['employee_uuid'] = name[0]
     resampled['account_uuid'] = name[1]

@@ -1,6 +1,8 @@
-import pandas as pd
+import polars as pl
 
 from modules.consent import constants
+from modules.consent.processors.consent_processor import ConsentProcessor
+from modules.global_utils import ProcessorHelper
 
 
 class ConsentDataProcessor:
@@ -8,101 +10,69 @@ class ConsentDataProcessor:
     Class to process consent data and calculate various consent metrics.
     """
 
-    def __init__(self, input_data_frame: pd.DataFrame):
+    def __init__(self, input_lazy_frame: pl.LazyFrame):
         """
         Initialize with input data frame.
 
-        Parameters:
-        input_data_frame (pd.DataFrame): The input consent data.
+        :param input_lazy_frame: The input consent data as a Polars LazyFrame.
         """
-        self.input_data_frame = input_data_frame
-        self.processing_data_frame = pd.DataFrame()
-        self.output_data_frame = pd.DataFrame()
-        self._prepare_data_frame()
-
-    def _prepare_data_frame(self):
-        """
-        Prepare data frame by extracting necessary columns.
-        """
-        column_mapping = {
-            'account_uuid': 'account_uuid',
-            'hcp_uuid': 'hcp_uuid',
-            'employee_uuid': 'employee_uuid',
-            'ter_code': 'territory',
-            'int_title': 'title',
-            'cust_ae_consent_flag': 'ae_consent',
-            'cust_me_consent_flag': 'me_consent',
+        self.input_lazy_frame = input_lazy_frame
+        self._processor_classes = {
+            'ConsentProcessor': ConsentProcessor
         }
 
-        self.processing_data_frame = self.input_data_frame.rename(columns=column_mapping)[list(column_mapping.values())]
-
-        self.processing_data_frame['cases_date'] = pd.to_datetime(
-            self.input_data_frame['cases_date'].str.replace(' ', '')
-        )
-
-        # Sorting to ensure the latest date is taken
-        self.processing_data_frame = self.processing_data_frame.sort_values(by='cases_date')
-
-    def process_data(self):
+    @property
+    def processor_classes(self) -> dict:
         """
-        Calculate consent metrics.
+        Get the mapping of processor names to their classes.
+
+        :return: A dictionary mapping processor names to processor classes.
+        :rtype: dict
         """
-        # Group by the necessary columns and get the latest date for each title
-        consent_groups = self.processing_data_frame.groupby(
-            constants.COMMON_GROUP_COLUMNS + ['title']
-        )
+        return self._processor_classes
 
-        consent_df = consent_groups.agg({'cases_date': 'max'}).reset_index()
-
-        # Mapping consent types and status
-        consent_df['metrics'] = consent_df['title'].map(constants.CONSENT_TYPES).fillna('None')
-        consent_df['value'] = consent_df['title'].map(constants.CONSENT_STATUS).fillna('None')
-
-        # Adding other necessary columns
-        consent_df['type'] = 'consent'
-        consent_df['indicator'] = constants.INDICATOR_CONSENT
-
-        # Formatting the timestamp
-        consent_df['timestamp'] = consent_df['cases_date'].transform(lambda x: x.isoformat())
-        consent_df['period'] = constants.PERIOD_DATE
-
-        consent_flag_df = self._add_consent_flag_data()
-
-        self.output_data_frame = pd.concat([consent_df[[
-            'timestamp', 'period', 'employee_uuid', 'hcp_uuid', 'account_uuid',
-            'type', 'indicator', 'value', 'metrics'
-        ]], consent_flag_df], ignore_index=True)
-
-    def _add_consent_flag_data(self):
+    def process_processor(
+            self,
+            processor_name: str,
+            compute: bool = True
+    ) -> pl.LazyFrame | pl.DataFrame:
         """
-        Add consent flag data to the output data frame.
+        Process data using the specified processor.
+
+        :param processor_name: The name of the processor to use. Must be one of the keys in `processor_classes`.
+        :type processor_name: str
+        :param compute: Whether to compute the result and return a DataFrame (`True`) or return a LazyFrame (`False`).
+                        Default is `True`.
+        :type compute: bool, optional
+        :return: The processed data. Type depends on the `compute` parameter.
+        :rtype: pl.DataFrame or pl.LazyFrame
+        :raises ValueError: If the specified `processor_name` is not available in `processor_classes`.
         """
-        for flag, metric in constants.CONSENT_FLAGS.items():
-            consent_flag_df = (self.processing_data_frame[['employee_uuid', 'hcp_uuid', 'account_uuid', flag]]
-                               .drop_duplicates())
-            consent_flag_df['value'] = consent_flag_df[flag].map(constants.CONSENT_FLAG_STATUS).fillna('None')
-            consent_flag_df['indicator'] = flag
-            consent_flag_df['type'] = 'consent'
-            consent_flag_df['metrics'] = metric
-            consent_flag_df['period'] = constants.PERIOD_DATE
-            consent_flag_df['timestamp'] = pd.NaT
+        if processor_name not in self.processor_classes:
+            raise ValueError(f"Processor '{processor_name}' is not available.")
 
-            # Ensure only the required columns are present and others are set to empty
-            required_columns = [
-                'timestamp', 'period', 'employee_uuid', 'hcp_uuid', 'account_uuid',
-                'territory', 'type', 'indicator', 'value', 'metrics'
-            ]
-            for col in required_columns:
-                if col not in consent_flag_df.columns:
-                    consent_flag_df[col] = ''
+        processor_class = self.processor_classes[processor_name]
+        processor_object = processor_class(self.input_lazy_frame)
+        output_lazy_frame = processor_object.process()
+        del processor_object
+        output_lazy_frame = ProcessorHelper.enforce_metrics_schema(output_lazy_frame)
 
-            return consent_flag_df[required_columns]
+        return output_lazy_frame.collect() if compute else output_lazy_frame
 
-    def get_processed_data(self) -> pd.DataFrame:
+    def process_data(self, compute: bool = True) -> pl.LazyFrame | pl.DataFrame:
         """
-        Get the processed data with calculated consent metrics.
+        Process data using all available processors and combine the output.
 
-        Returns:
-        pd.DataFrame: The processed data frame.
+        :param compute: Whether to compute the result and return a DataFrame (`True`) or return a LazyFrame (`False`).
+                        Default is `True`.
+        :type compute: bool, optional
+        :return: The combined processed data from all processors.
+        :rtype: pl.DataFrame or pl.LazyFrame
         """
-        return self.output_data_frame
+        combined_lazy_frame = pl.LazyFrame()
+
+        for processor_name in self.processor_classes:
+            processor_lazy_frame = self.process_processor(processor_name, compute=False)
+            combined_lazy_frame = pl.concat([combined_lazy_frame, processor_lazy_frame])
+
+        return combined_lazy_frame.collect() if compute else combined_lazy_frame

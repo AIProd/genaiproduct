@@ -10,6 +10,29 @@ COMMON_GROUP_COLUMNS = [
     'source',
 ]
 
+UNGROUPING_COLUMNS = [
+    'employee_uuid',
+    'hcp_uuid',
+    'territory',
+    'channel',
+    'category',
+    'source',
+]
+
+TERRITORY_GROUP_COLUMNS = [
+    'product_name',
+    'territory',
+    'channel',
+    'category',
+    'source',
+]
+
+ADDITIONAL_COLUMNS = [
+    'employee_uuid',
+    'account_uuid',
+    'hcp_uuid',
+]
+
 COLUMN_MAPPING = {
     'account_uuid': 'account_uuid',
     'hcp_uuid': 'hcp_uuid',
@@ -24,6 +47,8 @@ COLUMN_MAPPING = {
     'order_category': 'category',
     'cases_date': 'timestamp',
 }
+
+COLUMN_TIMESTAMP = 'timestamp'
 
 COLUMN_SALES = 'sales'
 COLUMN_SALES_PER_YEAR = 'sales_per_year'
@@ -76,6 +101,10 @@ INDICATOR_MOVING_ANNUAL_TOTAL_UNITS = 'moving_annual_total_units'
 INDICATOR_SALES_CHANGE_PREVIOUS_YEAR = 'sales_change_previous_year'
 INDICATOR_UNITS_CHANGE_PREVIOUS_YEAR = 'units_change_previous_year'
 
+INDICATOR_ROLLING_QUARTER_SALES_UNGROUPED = 'rolling_quarter_sales_ungrouped'
+INDICATOR_MOVING_ANNUAL_TOTAL_SALES_UNGROUPED = 'moving_annual_total_sales_ungrouped'
+INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR_SALES_UNGROUPED = 'rolling_quarter_change_previous_year_sales_ungrouped'
+INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR_SALES_UNGROUPED = 'mat_growth_change_previous_year_sales_ungrouped'
 
 FINDING_TYPE_TRENDS = 'trends'
 FINDING_TYPE_MSD_ORDERS_RECOMMENDATIONS = 'msd_orders_recommendations'
@@ -83,3 +112,18 @@ FINDING_TYPE_CROSS_SELLING_OPPORTUNITIES = 'cross_selling_opportunities'
 FINDING_TYPE_CANTONAL_PROGRAM = 'cantonal_program_recommendation'
 FINDING_TYPE_HIGH_PERFORMING_ACCOUNT = 'high_performing_account'
 FINDING_TYPE_UNDER_PERFORMING_ACCOUNT = 'under_performing_account'
+
+INDICATOR_SALES_TERRITORY = 'sales_territory'
+INDICATOR_UNITS_TERRITORY = 'units_territory'
+INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR_SALES_TERRITORY = 'rolling_quarter_change_previous_year_territory'
+INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR_SALES_TERRITORY = 'mat_growth_change_previous_year_territory'
+
+INDICATOR_ROLLING_QUARTER_SALES_TERRITORY = 'ROLQ_territory'
+INDICATOR_MOVING_ANNUAL_TOTAL_SALES_TERRITORY = 'MAT_territory'
+INDICATOR_SALES_CHANGE_PREVIOUS_YEAR_TERRITORY = 'sales_change_previous_year_territory'
+INDICATOR_UNITS_CHANGE_PREVIOUS_YEAR_TERRITORY = 'units_change_previous_year_territory'
+INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR_UNITS_TERRITORY = 'rolling_quarter_change_previous_year_units_territory'
+INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR_UNITS_TERRITORY = 'mat_growth_change_previous_year_units_territory'
+INDICATOR_ROLLING_QUARTER_UNITS_TERRITORY = 'rolling_quarter_units_territory'
+INDICATOR_MOVING_ANNUAL_TOTAL_UNITS_TERRITORY = 'moving_annual_total_units_territory'
+

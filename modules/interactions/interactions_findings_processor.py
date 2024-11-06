@@ -25,6 +25,7 @@ class InteractionsFindingsProcessor:
                                                        'employee_uuid',
                                                        'type',
                                                        'details',
+                                                       'product_name',
                                                        'timestamp',
                                                        ])
 
@@ -37,7 +38,18 @@ class InteractionsFindingsProcessor:
                     if result:
                         findings.extend(result)
 
-        self.output_data_frame = pd.DataFrame([finding.__dict__ for finding in findings])
+        self.output_data_frame = pd.DataFrame(
+            columns=[
+                'account_uuid',
+                'hcp_uuid',
+                'employee_uuid',
+                'type',
+                'details',
+                'product_name',
+                'timestamp',
+            ],
+            data=[finding.__dict__ for finding in findings]
+        )
 
     def get_processed_data(self):
         return self.output_data_frame

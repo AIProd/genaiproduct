@@ -10,7 +10,7 @@ from modules.interactions.findings.finding import Finding
 class HighPriorityEngagementFinding(Finding):
 
     def generate(self, data: pd.DataFrame) -> Optional[List[FindingResult]]:
-        data = data[data['indicator'] == 'high_priority_engagements']
+        data = data[data['indicator'] == constants.INDICATOR_HIGH_PRIORITY_ACCOUNT_DAYS_WITHOUT_INTERACTION]
         hcp_groups = data.groupby('hcp_uuid')
 
         findings = []

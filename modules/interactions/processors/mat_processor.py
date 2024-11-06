@@ -19,7 +19,8 @@ class MATProcessor(TimeSeriesProcessor):
             period='1y',
             group_by=constants.COMMON_GROUP_COLUMNS,
         ).agg(
-            pl.col(constants.COLUMN_TOTAL_ACTIONS).sum().alias(constants.MOVING_ANNUAL_TOTAL_COLUMN_TOTAL_ACTIONS),
+            pl.lit('').alias(constants.COLUMN_SUBJECT),
+            pl.col(constants.COLUMN_TOTAL_ACTIONS).count().alias(constants.MOVING_ANNUAL_TOTAL_COLUMN_TOTAL_ACTIONS),
         )
 
         lazy_frame = lazy_frame.with_columns(
@@ -31,11 +32,11 @@ class MATProcessor(TimeSeriesProcessor):
         lazy_frame = lazy_frame.with_columns(
             (
                     (
-                            pl.col(constants.MOVING_ANNUAL_TOTAL_COLUMN_TOTAL_ACTIONS) - pl.col(
-                                constants.MOVING_ANNUAL_TOTAL_COLUMN_LAST_YEAR_TOTAL_ACTIONS
-                            )
-                    ) / pl.col(constants.MOVING_ANNUAL_TOTAL_COLUMN_LAST_YEAR_TOTAL_ACTIONS) * 100
-            ).alias(constants.PERCENTAGE_MOVING_ANNUAL_TOTAL_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR),
+                            (pl.col(constants.MOVING_ANNUAL_TOTAL_COLUMN_TOTAL_ACTIONS).cast(pl.Float64) -
+                             pl.col(constants.MOVING_ANNUAL_TOTAL_COLUMN_LAST_YEAR_TOTAL_ACTIONS).cast(pl.Float64)) /
+                            pl.col(constants.MOVING_ANNUAL_TOTAL_COLUMN_LAST_YEAR_TOTAL_ACTIONS).cast(pl.Float64)
+                    ).round(4) * 100
+            ).alias(constants.PERCENTAGE_MOVING_ANNUAL_TOTAL_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR)
         )
 
         lazy_frame = lazy_frame.with_columns(
@@ -57,7 +58,7 @@ class MATProcessor(TimeSeriesProcessor):
                 constants.MOVING_ANNUAL_TOTAL_COLUMN_TOTAL_ACTIONS,
                 constants.PERCENTAGE_MOVING_ANNUAL_TOTAL_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR,
             ],
-            constants.COMMON_GROUP_COLUMNS,
+            constants.COMMON_GROUP_COLUMNS + [constants.COLUMN_TIMESTAMP, constants.COLUMN_SUBJECT],
             {
                 constants.MOVING_ANNUAL_TOTAL_COLUMN_TOTAL_ACTIONS: constants.INDICATOR_MOVING_ANNUAL_TOTAL,
                 constants.PERCENTAGE_MOVING_ANNUAL_TOTAL_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR: constants.INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR

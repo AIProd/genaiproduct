@@ -28,6 +28,7 @@ class LackOfExplicitConsentFinding(Finding):
                 account_uuid=account_uuid,
                 hcp_uuid=hcp_uuid,
                 employee_uuid=employee_uuid,
+                product_name='',
                 type="Consent",
                 details=details
             )

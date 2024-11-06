@@ -1,7 +1,7 @@
 from langchain_core.prompts import PromptTemplate
 
 hcp_insight_prompt = PromptTemplate(
-    input_variables=["hcp_name", "account_name","employee_name", "finding"],
+    input_variables=["hcp_name", "account_name", "employee_name", "finding"],
     template="""
          Role:
         You are a data analyst tasked with deriving actionable insights based on findings related to various healthcare professionals (HCPs). Your goal is to analyze the findings and provide strategic recommendations for the sales team.
@@ -57,4 +57,20 @@ hcp_insight_prompt = PromptTemplate(
          Final Instructions:
         Generate insights for each HCP listed to be read by me, using the format and example above. The output should focus solely on the insights and follow the length guidelines of 80-120 words.
         """
+)
+
+
+
+email_findings_summary_prompt = PromptTemplate(
+    input_variables=["subjects"],
+    template="""
+        Please review the following email subject lines from the past some months 
+        and generate a one-line summary that captures the main themes and key actions 
+        discussed in these emails. 
+        The summary should be concise, professional, and appropriate for a business report:
+
+        {subjects}
+
+        Return only a single sentence as the summary.
+    """
 )

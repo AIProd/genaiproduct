@@ -20,7 +20,9 @@ class CantonalFinding(Finding):
         if not hcp_uuid:
             return None
 
-        pediatric_data = data.merge(self.hcps_df, left_on='hcp_uuid', right_on='uuid', how='inner')
+        hcps = self.hcps_df[self.hcps_df['specialty'] == 'Pediatrics']
+
+        pediatric_data = data.merge(hcps, left_on='hcp_uuid', right_on='uuid', how='inner')
         gardasil_data = pediatric_data[pediatric_data['product_name'] == 'GARDASIL9']
 
         if pediatric_data.empty:
@@ -34,7 +36,7 @@ class CantonalFinding(Finding):
                     employee_uuid=employee_uuid,
                     type=constants.FINDING_TYPE_CANTONAL_PROGRAM,
                     details="HCP in account not buying GARDASIL9",
-                    product_name=None
+                    product_name=''
                 )
             )
 

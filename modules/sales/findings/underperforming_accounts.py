@@ -14,8 +14,8 @@ class UnderperformingAccounts(Finding):
         hcp_uuid = data['hcp_uuid'].iloc[0]
         employee_uuid = data['employee_uuid'].iloc[0]
 
-        mat_growth_df = data[data['indicator'] == constants.INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR].copy()
-        rolq_growth_df = data[data['indicator'] == constants.INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR].copy()
+        mat_growth_df = data[data['indicator'] == constants.INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR_SALES].copy()
+        rolq_growth_df = data[data['indicator'] == constants.INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR_SALES].copy()
 
         if mat_growth_df.empty or rolq_growth_df.empty:
             return None

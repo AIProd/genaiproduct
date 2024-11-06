@@ -1,9 +1,18 @@
 import polars as pl
 
+from modules.global_utils import ProcessorHelper
+from modules.sales import constants
 from modules.sales.processors.annual_processor import AnnualProcessor
 from modules.sales.processors.mat_processor import MATProcessor
+from modules.sales.processors.mat_processor_ungrouped import MATProcessorUngrouped
 from modules.sales.processors.monthly_processor import MonthlyProcessor
 from modules.sales.processors.rolq_processor import ROLQProcessor
+
+from modules.sales.processors.annual_processor_territory import AnnualProcessorTerritory
+from modules.sales.processors.mat_processor_territory import MATProcessorTerritory
+from modules.sales.processors.monthly_processor_territory import MonthlyProcessorTerritory
+from modules.sales.processors.rolq_processor_territory import ROLQProcessorTerritory
+from modules.sales.processors.rolq_processor_ungrouped import ROLQProcessorUngrouped
 
 
 class SalesDataProcessor:
@@ -23,7 +32,14 @@ class SalesDataProcessor:
             'MonthlyProcessor': MonthlyProcessor,
             'AnnualProcessor': AnnualProcessor,
             'MATProcessor': MATProcessor,
+            'MATProcessorUngrouped': MATProcessorUngrouped,
             'ROLQProcessor': ROLQProcessor,
+            'ROLQProcessorUngrouped': ROLQProcessorUngrouped,
+            'MonthlyProcessorTerritory': MonthlyProcessorTerritory,
+            'AnnualProcessorTerritory': AnnualProcessorTerritory,
+            'MATProcessorTerritory': MATProcessorTerritory,
+            'ROLQProcessorTerritory': ROLQProcessorTerritory
+
         }
 
     @property
@@ -60,6 +76,7 @@ class SalesDataProcessor:
         processor_object = processor_class(self.input_lazy_frame)
         output_lazy_frame = processor_object.process()
         del processor_object
+        output_lazy_frame = ProcessorHelper.enforce_metrics_schema(output_lazy_frame)
 
         return output_lazy_frame.collect() if compute else output_lazy_frame
 

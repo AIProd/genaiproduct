@@ -12,6 +12,15 @@ COMMON_GROUP_COLUMNS = [
     'source',
 ]
 
+UNGROUPING_COLUMNS = [
+    'employee_uuid',
+    'product_name',
+    'territory',
+    'type',
+    'category',
+    'source',
+]
+
 COLUMN_TOTAL_ACTIONS = 'total_actions'
 COLUMN_TOTAL_OPENS = 'total_opens'
 COLUMN_REJECTION = 'rejection'
@@ -19,6 +28,7 @@ COLUMN_ACCEPTATION = 'acceptation'
 COLUMN_REACTION = 'reaction'
 
 COLUMN_TIMESTAMP = 'timestamp'
+COLUMN_SUBJECT = 'subject'
 
 COLUMN_LAST_YEAR_TOTAL_ACTIONS = 'total_actions_last_year'
 
@@ -69,6 +79,10 @@ INDICATOR_REACTION_PERCENTAGE = 'reaction_percentage'
 INDICATOR_REJECTION_PERCENTAGE = 'rejection_percentage'
 INDICATOR_ACCEPTATION_PERCENTAGE = 'acceptation_percentage'
 
+INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR_UNGROUPED = 'rolling_quarter_change_previous_year_ungrouped'
+INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR_UNGROUPED = 'mat_growth_change_previous_year_ungrouped'
+INDICATOR_ROLLING_QUARTER_UNGROUPED = 'rolling_quarter_ungrouped'
+INDICATOR_MOVING_ANNUAL_TOTAL_UNGROUPED = 'moving_annual_total_ungrouped'
 
 PERIOD_MONTH = 'month'
 PERIOD_YEAR = 'year'
@@ -94,7 +108,6 @@ COLUMN_MAPPING = {
     'order_category': 'category',
     'cases_date': 'timestamp',
     'int_title': 'subject',
-    'ter_target': 'ter_target',
 }
 
 EMAIL_CHANNELS = ['AE - Veeva', 'SFMC Marketing Email']
@@ -108,3 +121,27 @@ INTERACTION_CHANNEL_CALL = 'CALLS - Veeva'
 INTERACTION_TYPE_IN_PERSON = 'In Person'
 
 HIGH_PRIORITY_TERRITORY_TARGETS = ['A', 'B']
+
+INDICATOR_CLICKED_EMAIL = 'clicked_email_subject'
+INDICATOR_READ_EMAIL = 'read_email_subject'
+INDICATOR_UNREAD_EMAIL = 'unread_email_subject'
+INDICATOR_REJECTED_EMAIL = 'rejected_email_subject'
+COLUMN_INDICATOR = 'indicator'
+COLUMN_ACCOUNT_UUID = 'account_uuid'
+COLUMN_HCP_UUID = 'hcp_uuid'
+COLUMN_EMPLOYEE_UUID = 'employee_uuid'
+COLUMN_PRODUCT_NAME = 'product_name'
+
+NO_EMAILS_MESSAGE = "No emails in this category."
+
+FINDING_TYPE_CLICKED_EMAIL = 'clicked_summary'
+FINDING_TYPE_READ_EMAIL = 'read_summary'
+FINDING_TYPE_UNREAD_EMAIL = 'unread_summary'
+FINDING_TYPE_CLICKED_EMAIL_AE = 'clicked_summary_ae'
+FINDING_TYPE_READ_EMAIL_AE = 'read_summary_ae'
+FINDING_TYPE_UNREAD_EMAIL_AE = 'unread_summary_ae'
+FINDING_TYPE_EMAIL_FINDINGS_AE = 'email_summary_ae'
+FINDING_TYPE_CLICKED_EMAIL_ME = 'clicked_summary_me'
+FINDING_TYPE_READ_EMAIL_ME = 'read_summary_me'
+FINDING_TYPE_UNREAD_EMAIL_ME = 'unread_summary_me'
+FINDING_TYPE_EMAIL_FINDINGS_ME = 'email_summary_me'

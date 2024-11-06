@@ -42,7 +42,7 @@ class MonthlyProcessor(TimeSeriesProcessor):
                 constants.COLUMN_TOTAL_ACTIONS,
                 constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR,
             ],
-            constants.COMMON_GROUP_COLUMNS,
+            constants.COMMON_GROUP_COLUMNS + [constants.COLUMN_TIMESTAMP, constants.COLUMN_SUBJECT],
             {
                 constants.COLUMN_TOTAL_ACTIONS: constants.INDICATOR_TOTAL_ACTIONS,
                 constants.PERCENTAGE_COLUMN_TOTAL_ACTIONS_CHANGE_LAST_YEAR: constants.INDICATOR_TOTAL_ACTIONS_CHANGE_PREVIOUS_YEAR,

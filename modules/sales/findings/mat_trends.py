@@ -10,8 +10,8 @@ from modules.sales.findings.finding import Finding
 class MATTrends(Finding):
 
     def generate(self, data: pd.DataFrame) -> Optional[List[FindingResult]]:
-        mat_df = data[data['indicator'] == constants.INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR].copy()
-        rolq_df = data[data['indicator'] == constants.INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR].copy()
+        mat_df = data[data['indicator'] == constants.INDICATOR_MOVING_ANNUAL_TOTAL_CHANGE_PREVIOUS_YEAR_SALES_UNGROUPED].copy()
+        rolq_df = data[data['indicator'] == constants.INDICATOR_ROLLING_QUARTER_CHANGE_PREVIOUS_YEAR_SALES_UNGROUPED].copy()
 
         if mat_df.empty or rolq_df.empty:
             return None
@@ -28,8 +28,8 @@ class MATTrends(Finding):
                 'product_name',
                 'territory',
                 'channel',
-                'type',
-                'metrics',
+                'metric_type',
+                'metric',
                 'source',
                 'category',
             ], suffixes=('_mat', '_rolq'))
@@ -74,6 +74,13 @@ class MATTrends(Finding):
         delta_rolling_quarter_change_current_month = float(row['value_rolq'])
         delta_mat_change_previous_month = float(last_row['value_mat'])
         delta_mat_change_current_month = float(row['value_mat'])
+
+        if (delta_mat_change_previous_month == 0 and
+                delta_rolling_quarter_previous_month == 0 and
+                delta_mat_change_current_month == 0 and
+                delta_rolling_quarter_change_current_month == 0):
+
+            return "No change observed in both long-term and recent trends."
 
         conditions = (
             delta_mat_change_previous_month < 0,

@@ -17,6 +17,7 @@ class ConsentFindingsProcessor:
                                                        'employee_uuid',
                                                        'type',
                                                        'details',
+                                                       'product_name',
                                                        'timestamp',
                                                        ])
 
@@ -28,14 +29,18 @@ class ConsentFindingsProcessor:
                 if result:
                     findings.append(result)
 
-        self.output_data_frame = pd.DataFrame([finding.__dict__ for finding in findings], columns=[
-            'account_uuid',
-            'hcp_uuid',
-            'employee_uuid',
-            'type',
-            'details',
-            'timestamp',
-        ])
+        self.output_data_frame = pd.DataFrame(
+            columns=[
+                'account_uuid',
+                'hcp_uuid',
+                'employee_uuid',
+                'type',
+                'details',
+                'product_name',
+                'timestamp',
+            ],
+            data=[finding.__dict__ for finding in findings]
+        )
 
     def get_processed_data(self) -> pd.DataFrame:
         return self.output_data_frame

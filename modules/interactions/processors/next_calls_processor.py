@@ -15,7 +15,7 @@ class NextCallsProcessor(Processor):
         ])
 
         lazy_frame = lazy_frame.with_columns(
-            pl.col(constants.COLUMN_TIMESTAMP).str.to_datetime().dt.truncate('1mo'),
+            pl.col(constants.COLUMN_TIMESTAMP).str.to_datetime(),
         )
 
         lazy_frame = lazy_frame.filter(
@@ -34,6 +34,7 @@ class NextCallsProcessor(Processor):
             *[pl.col(new_name)
               for new_name in constants.COMMON_GROUP_COLUMNS],
             pl.col(constants.COLUMN_TIMESTAMP),
+            pl.col(constants.COLUMN_SUBJECT),
             pl.lit(constants.INDICATOR_NEXT_CALL).alias('indicator'),
             pl.lit(1.0).alias('value'),
             pl.lit(constants.METRIC_DATE).alias('metric'),
@@ -41,4 +42,7 @@ class NextCallsProcessor(Processor):
             pl.lit(constants.METRIC_TYPE_INTERACTIONS).alias('metric_type'),
         ])
 
-        return ProcessorHelper.select_metric_columns(lazy_frame, constants.COMMON_GROUP_COLUMNS)
+        return ProcessorHelper.select_metric_columns(
+            lazy_frame,
+            constants.COMMON_GROUP_COLUMNS + [constants.COLUMN_TIMESTAMP, constants.COLUMN_SUBJECT]
+        )
